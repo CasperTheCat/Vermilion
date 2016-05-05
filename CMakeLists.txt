@@ -10,8 +10,9 @@ set(SOURCE_FILES main.cpp
         core/engines/meshEngine.h
         core/engines/loggingEngine.cpp
         core/engines/loggingEngine.h
-        core/frameTile/frameTile.cpp
-        core/frameTile/frameTile.h core/types/types.h)
+        core/camera/frameTile/frameTile.cpp
+        core/camera/frameTile/frameTile.h
+        core/types/types.h core/camera/camera.cpp core/camera/camera.h core/integrators/integrators.cpp core/integrators/integrators.h)
 
 
 link_directories(${CMAKE_SOURCE_DIR}/assimp/lib)

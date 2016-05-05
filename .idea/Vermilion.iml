@@ -2,15 +2,19 @@
 <module type="CPP_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/core/camera/camera.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/core/camera/frameTile/frameTile.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/core/camera/frameTile/frameTile.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/core/camera/camera.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/core/engines/meshEngine.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/core/engines/loggingEngine.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/core/engines/renderEngine.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/core/engines/loggingEngine.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/core/engines/meshEngine.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/core/engines/renderEngine.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/core/frameTile/frameTile.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/core/frameTile/frameTile.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/core/types/types.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/core/integrators/integrators.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/core/integrators/integrators.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/main.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
     </content>

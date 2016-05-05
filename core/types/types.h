@@ -5,8 +5,7 @@
 #ifndef VERMILION_TYPES_H
 #define VERMILION_TYPES_H
 
-namespace Vermilion
-{
+namespace Vermilion {
 
 // Floating point type.
 #ifndef USEDOUBLEPREC
@@ -15,128 +14,107 @@ namespace Vermilion
     typedef double FLOAT;
 #endif
 
-
 // This file contains the code for any engine types
 // Namely multidimensional floats
 
-    struct float2
-    {
+    struct float2 {
         // Data
         FLOAT x, y;
 
         // Constructor
-        float2(FLOAT nx, FLOAT ny) : x(nx), y(ny)
-        { }
+        float2(FLOAT nx, FLOAT ny) : x(nx), y(ny) { }
 
-        float2()
-        { }
+        float2() { }
 
         /// Operators
         // Addition
-        float2 operator+(float2 &rhs) const
-        {
+        float2 operator+(float2 &rhs) const {
             return float2(this->x + rhs.x, this->y + rhs.y);
         }
 
         // Subtraction
-        float2 operator-(float2 &rhs) const
-        {
+        float2 operator-(float2 &rhs) const {
             return float2(this->x - rhs.x, this->y - rhs.y);
         }
 
         // Mul
-        float2 operator*(float2 &rhs) const
-        {
+        float2 operator*(float2 &rhs) const {
             return float2(this->x * rhs.x, this->y * rhs.y);
         }
 
         // Div
-        float2 operator/(float2 &rhs) const
-        {
+        float2 operator/(float2 &rhs) const {
             return float2(this->x / rhs.x, this->y / rhs.y);
         }
 
         /// Self mods
         // Addition
-        float2 &operator+=(float2 &rhs)
-        {
+        float2 &operator+=(float2 &rhs) {
             this->x += rhs.x;
             this->y += rhs.y;
             return *this;
         }
 
         // Subtraction
-        float2 &operator-=(float2 &rhs)
-        {
+        float2 &operator-=(float2 &rhs) {
             this->x -= rhs.x;
             this->y -= rhs.y;
             return *this;
         }
 
         // Mul
-        float2 &operator*=(float2 &rhs)
-        {
+        float2 &operator*=(float2 &rhs) {
             this->x *= rhs.x;
             this->y *= rhs.y;
             return *this;
         }
 
         // Div
-        float2 &operator/=(float2 &rhs)
-        {
+        float2 &operator/=(float2 &rhs) {
             this->x /= rhs.x;
             this->y /= rhs.y;
             return *this;
         }
 
         // Assignment
-        bool operator==(float2 &rhs) const
-        {
+        bool operator==(float2 &rhs) const {
             return this->x == rhs.x && this->y == rhs.y;
         }
     };
 
-    struct float3
-    {
+    struct float3 {
         // Data
         FLOAT x, y, z;
 
         // Constructor
-        float3(FLOAT nx, FLOAT ny, FLOAT nz) : x(nx), y(ny), z(nz)
-        { }
+        float3(FLOAT nx, FLOAT ny, FLOAT nz) : x(nx), y(ny), z(nz) { }
 
-        float3()
-        { }
+        float3() { }
 
         /// Operators
         // Addition
-        float3 operator+(float3 &rhs) const
-        {
+        float3 operator+(float3 &rhs) const {
             return float3(this->x + rhs.x, this->y + rhs.y, this->z + rhs.z);
         }
 
         // Subtraction
-        float3 operator-(float3 &rhs) const
-        {
+        float3 operator-(float3 &rhs) const {
             return float3(this->x - rhs.x, this->y - rhs.y, this->z - rhs.z);
         }
 
         // Mul
-        float3 operator*(float3 &rhs) const
-        {
+        float3 operator*(float3 &rhs) const {
             return float3(this->x * rhs.x, this->y * rhs.y, this->z * rhs.z);
         }
 
         // Div
-        float3 operator/(float3 &rhs) const
-        {
+        float3 operator/(float3 &rhs) const {
             return float3(this->x / rhs.x, this->y / rhs.y, this->z / rhs.z);
         }
 
         /// Self mods
         // Addition
-        float3 &operator+=(float3 &rhs)
-        {
+        float3 &operator+=(float3 &rhs) {
             this->x += rhs.x;
             this->y += rhs.y;
             this->z += rhs.z;
@@ -144,8 +122,7 @@ namespace Vermilion
         }
 
         // Subtraction
-        float3 &operator-=(float3 &rhs)
-        {
+        float3 &operator-=(float3 &rhs) {
             this->x -= rhs.x;
             this->y -= rhs.y;
             this->z -= rhs.z;
@@ -153,8 +130,7 @@ namespace Vermilion
         }
 
         // Mul
-        float3 &operator*=(float3 &rhs)
-        {
+        float3 &operator*=(float3 &rhs) {
             this->x *= rhs.x;
             this->y *= rhs.y;
             this->z *= rhs.z;
@@ -162,8 +138,7 @@ namespace Vermilion
         }
 
         // Div
-        float3 &operator/=(float3 &rhs)
-        {
+        float3 &operator/=(float3 &rhs) {
             this->x /= rhs.x;
             this->y /= rhs.y;
             this->z /= rhs.z;
@@ -171,28 +146,23 @@ namespace Vermilion
         }
 
         // Assignment
-        bool operator==(float3 &rhs) const
-        {
+        bool operator==(float3 &rhs) const {
             return this->x == rhs.x && this->y == rhs.y && this->z == rhs.z;
         }
     };
 
-    struct float4
-    {
+    struct float4 {
         // Data
         FLOAT x, y, z, w;
 
         // Constructor
-        float4(FLOAT nx, FLOAT ny, FLOAT nz, FLOAT nw) : x(nx), y(ny), z(nz), w(nw)
-        { }
+        float4(FLOAT nx, FLOAT ny, FLOAT nz, FLOAT nw) : x(nx), y(ny), z(nz), w(nw) { }
 
-        float4()
-        { }
+        float4() { }
 
         /// Operators
         // Addition
-        float4 operator+(float4 &rhs) const
-        {
+        float4 operator+(float4 &rhs) const {
             return float4(this->x + rhs.x,
                           this->y + rhs.y,
                           this->z + rhs.z,
@@ -200,8 +170,7 @@ namespace Vermilion
         }
 
         // Subtraction
-        float4 operator-(float4 &rhs) const
-        {
+        float4 operator-(float4 &rhs) const {
             return float4(this->x + rhs.x,
                           this->y - rhs.y,
                           this->z - rhs.z,
@@ -209,8 +178,7 @@ namespace Vermilion
         }
 
         // Mul
-        float4 operator*(float4 &rhs) const
-        {
+        float4 operator*(float4 &rhs) const {
             return float4(this->x + rhs.x,
                           this->y * rhs.y,
                           this->z * rhs.z,
@@ -218,8 +186,7 @@ namespace Vermilion
         }
 
         // Div
-        float4 operator/(float4 &rhs) const
-        {
+        float4 operator/(float4 &rhs) const {
             return float4(this->x + rhs.x,
                           this->y / rhs.y,
                           this->z / rhs.z,
@@ -228,8 +195,7 @@ namespace Vermilion
 
         /// Self mods
         // Addition
-        float4 &operator+=(float4 &rhs)
-        {
+        float4 &operator+=(float4 &rhs) {
             this->x += rhs.x;
             this->y += rhs.y;
             this->z += rhs.z;
@@ -238,8 +204,7 @@ namespace Vermilion
         }
 
         // Subtraction
-        float4 &operator-=(float4 &rhs)
-        {
+        float4 &operator-=(float4 &rhs) {
             this->x -= rhs.x;
             this->y -= rhs.y;
             this->z -= rhs.z;
@@ -248,8 +213,7 @@ namespace Vermilion
         }
 
         // Mul
-        float4 &operator*=(float4 &rhs)
-        {
+        float4 &operator*=(float4 &rhs) {
             this->x *= rhs.x;
             this->y *= rhs.y;
             this->z *= rhs.z;
@@ -258,8 +222,7 @@ namespace Vermilion
         }
 
         // Div
-        float4 &operator/=(float4 &rhs)
-        {
+        float4 &operator/=(float4 &rhs) {
             this->x /= rhs.x;
             this->y /= rhs.y;
             this->z /= rhs.z;
@@ -268,8 +231,7 @@ namespace Vermilion
         }
 
         // Assignment
-        bool operator==(float4 &rhs) const
-        {
+        bool operator==(float4 &rhs) const {
             return this->x == rhs.x &&
                    this->y == rhs.y &&
                    this->z == rhs.z &&

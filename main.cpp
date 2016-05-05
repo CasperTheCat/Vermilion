@@ -5,14 +5,9 @@
 using namespace std;
 using namespace Vermilion;
 
-int main() {
-    float2 hello(2.f,2.f);
-    float2 rekt(2.f,2.f);
-    float2 x;
-    x = hello;
-    x += rekt;
-    cout << typeid("HELLO").name() << endl;
-    cout << x.x << endl;
+int main(int argc, char **argv) {
+    // We will needs to args check TBH
+    // Renderer time
     return 0;
 }
 
