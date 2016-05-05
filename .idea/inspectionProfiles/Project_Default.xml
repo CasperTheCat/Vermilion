@@ -1,0 +1,29 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="DeprecatedAPI" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="DuplicateSwitchCase" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="EndlessLoop" enabled="true" level="Bad Practice" enabled_by_default="true" />
+    <inspection_tool class="FunctionImplicitDeclarationInspection" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="HidesUpperScope" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="InfiniteRecursion" enabled="true" level="ERROR" enabled_by_default="true" />
+    <inspection_tool class="NotImplementedFunctions" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
+    <inspection_tool class="NotInitializedVariable" enabled="true" level="Bad Practice" enabled_by_default="true" />
+    <inspection_tool class="OCSimplifyInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="enableSimplifyIfWithConstantBranch" value="true" />
+    </inspection_tool>
+    <inspection_tool class="OCUnusedGlobalDeclarationInspection" enabled="true" level="INFO" enabled_by_default="true" />
+    <inspection_tool class="OCUnusedMacroInspection" enabled="true" level="INFO" enabled_by_default="true" />
+    <inspection_tool class="OCUnusedStructInspection" enabled="true" level="INFO" enabled_by_default="true" />
+    <inspection_tool class="OCUnusedTemplateParameterInspection" enabled="true" level="INFO" enabled_by_default="true" />
+    <inspection_tool class="RedundantCast" enabled="true" level="Bad Practice" enabled_by_default="true" />
+    <inspection_tool class="SignednessMismatch" enabled="true" level="Bad Practice" enabled_by_default="true" />
+    <inspection_tool class="UnreachableCode" enabled="true" level="Bad Practice" enabled_by_default="true" />
+    <inspection_tool class="UnusedExpressionResult" enabled="true" level="INFO" enabled_by_default="true" />
+    <inspection_tool class="UnusedImportStatement" enabled="true" level="INFO" enabled_by_default="true" />
+    <inspection_tool class="UnusedLocalVariable" enabled="true" level="INFO" enabled_by_default="true" />
+    <inspection_tool class="UnusedLocalization" enabled="true" level="INFO" enabled_by_default="true" />
+    <inspection_tool class="UnusedParameter" enabled="true" level="INFO" enabled_by_default="true" />
+    <inspection_tool class="UnusedValue" enabled="true" level="INFO" enabled_by_default="true" />
+  </profile>
+</component>
