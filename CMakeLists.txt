@@ -13,6 +13,7 @@ set(SOURCE_FILES main.cpp
         core/frameTile/frameTile.cpp
         core/frameTile/frameTile.h core/types/types.h)
 
+
 link_directories(${CMAKE_SOURCE_DIR}/assimp/lib)
 add_executable(Vermilion ${SOURCE_FILES})
 target_link_libraries(Vermilion assimp-vc120-mt.lib)
