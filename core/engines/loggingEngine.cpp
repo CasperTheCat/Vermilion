@@ -1,6 +1,6 @@
 ///// Vermilion Logging
 
-#include "LoggingEngine.h"
+#include "loggingEngine.h"
 #include <string>
 
 Vermilion::LogEngine::LogEngine(unsigned int startState, unsigned int nLogLevel) : state(startState), logLevel(nLogLevel)

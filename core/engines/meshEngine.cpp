@@ -1,6 +1,6 @@
 ////// Vermilion Mesh Engine
 
-#include "MeshEngine.h"
+#include "meshEngine.h"
 
 Vermilion::MeshEngine::MeshEngine()
 {

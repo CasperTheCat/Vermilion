@@ -7,7 +7,7 @@
 #include "../../extern/assimp/scene.h"
 #include "../../extern/assimp/postprocess.h"
 #include "../../extern/assimp/cimport.h"
-#include "LoggingEngine.h"
+#include "loggingEngine.h"
 #include "../types/types.h"
 
 namespace Vermilion
