@@ -6,7 +6,9 @@
 #define VERMILION_CAMERA_H
 
 #include <cstdint>
+#include <vector>
 #include "../types/types.h"
+#include "frameTile/frameTile.h"
 
 namespace Vermilion
 {
@@ -33,6 +35,13 @@ namespace Vermilion
 
         // it also needs a distance to the pixel grid
         FLOAT mDistToFilm;
+
+        // Frame tileset
+        std::vector<frameTile> tileset;
+
+        // settings
+        cameraSettings cSettings;
+
 
         /// Rays are spawned from camera origin and trace based on rotation
         /// Default camera alignment is along X

@@ -25,6 +25,8 @@ namespace Vermilion
         LogEngine* mLogEngine;
         bool bHasInternalLogEng;
 
+
+
     public:
         RenderEngine();
         RenderEngine(MeshEngine *mEng);

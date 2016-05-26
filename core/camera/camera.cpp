@@ -3,3 +3,9 @@
 //
 
 #include "camera.h"
+
+void Vermilion::Camera::renderFrame()
+{
+    // Scholastically sample the pixels
+    for(auto v = 0; v < )
+}
