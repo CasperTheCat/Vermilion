@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
 project(Vermilion)
 
+set(Boost_USE_STATIC_LIBS TRUE)
+set(Boost_USE_MULTITHREADED TRUE)
+set(Boost_USE_STATIC_RUNTIME FALSE)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+FIND_PACKAGE(Boost COMPONENTS system filesystem REQUIRED)
 
 set(SOURCE_FILES main.cpp
         core/engines/renderEngine.cpp
@@ -14,7 +19,10 @@ set(SOURCE_FILES main.cpp
         core/camera/frameTile/frameTile.h
         core/types/types.h core/camera/camera.cpp core/camera/camera.h core/integrators/integrators.cpp core/integrators/integrators.h)
 
+include_directories(
+        ${Boost_INCLUDE_DIRS}
+)
 
 link_directories(${CMAKE_SOURCE_DIR}/assimp/lib)
 add_executable(Vermilion ${SOURCE_FILES})
-target_link_libraries(Vermilion assimp-vc120-mt.lib)
+target_link_libraries(Vermilion assimp-vc120-mt.lib ${Boost_LIBRARIES})

@@ -9,31 +9,29 @@
 #include <cstdint>
 #include "../../types/types.h"
 
-namespace Vermilion {
+namespace Vermilion
+{
+	class frameTile
+	{
+		uint32_t mWidth;
+		uint32_t mHeight;
 
-    // struct of tile. Used for returned data.
-    struct rTile {
-        uint32_t mHeight;
-        uint32_t mWidth;
-        float4* mImage;
-    };
+		uint32_t renderOffsetX;
+		uint32_t renderOffsetY;
 
-    class frameTile {
-        uint32_t mWidth;
-        uint32_t mHeight;
+		float4 *mImage;
 
-        float4 *mImage;
+	public:
+		// Dummy Testing function
+		void setColor(uint32_t u, uint32_t v, float4 color);
 
-    public:
-        void setColor(uint32_t u, uint32_t v, float4 color);
+		// Get a pointer to the grid data. DO NOT FREE THIS!!!
+		float4* getTile() const;
 
-        // Get a pointer to the grid data. DO NOT FREE THIS!!!
-        rTile getTile();
+		frameTile(uint32_t width, uint32_t height, uint32_t oX, uint32_t oY);
 
-        frameTile(uint32_t width, uint32_t height);
-
-        ~frameTile();
-    };
+		~frameTile();
+	};
 }
 
 #endif //VERMILION_FRAMETILE_H

@@ -16,17 +16,24 @@ namespace Vermilion
     struct cameraSettings
     {
         // used for camera settings
+		uint32_t imageResX;
+		uint32_t imageResY;
         float3 position;
         float3 rotation;
         FLOAT fBackDistance;
         FLOAT horAngleOfView;
         uint32_t raysPerPixel;
         uint32_t rayMaxBounces;
-
+		uint32_t tileSize;
     };
 
     class Camera
     {
+		// Image data
+		uint32_t uImageU;
+		uint32_t uImageV;
+		float4* mImage; // Used for final image post composite
+
         // Camera needs a location
         float3 mPosition;
 
@@ -36,22 +43,37 @@ namespace Vermilion
         // it also needs a distance to the pixel grid
         FLOAT mDistToFilm;
 
-        // Frame tileset
-        std::vector<frameTile> tileset;
+		// Theta
+		FLOAT fAngleOfView;
 
-        // settings
-        cameraSettings cSettings;
+		// Ray data
+		uint32_t uMaxBounces;
+		uint32_t uSamplesPerPixel;
+
+		// Tiling size
+		uint32_t uBucketsU;
+		uint32_t uBucketsV;
+		uint32_t uTileSize;
+		
+        // Frame tileset for the rendergrid
+        std::vector<frameTile> vTileSet;
 
 
         /// Rays are spawned from camera origin and trace based on rotation
         /// Default camera alignment is along X
+
+		// Functions
+		void GenerateTileSet();
+		void RenderTile(frameTile &rTile);
 
     public:
         Camera(cameraSettings &_settings);
 
         ~Camera();
 
-        void renderFrame(); // Raytracer
+        void RenderFrame(); // Raytracer
+
+		void SaveFrame(std::string name);
 
     };
 

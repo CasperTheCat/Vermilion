@@ -6,10 +6,10 @@
 
 // Since this is a render engine. We will have own logger.
 Vermilion::RenderEngine::RenderEngine() :
-        bHasMeshEng(false),
-        bHasInternalLogEng(true),
         mCamera(nullptr),
-        mMeshEngine(nullptr)
+        mMeshEngine(nullptr),
+        bHasMeshEng(false),
+        bHasInternalLogEng(true)
 {
     // The lack of a mesh engine is problem here but we can make a logger
     // Logger needs override change settings
@@ -17,22 +17,22 @@ Vermilion::RenderEngine::RenderEngine() :
 }
 
 Vermilion::RenderEngine::RenderEngine(MeshEngine *mEng) :
-        bHasMeshEng(true),
-        bHasInternalLogEng(true),
         mCamera(nullptr),
+        mMeshEngine(mEng),
+        bHasMeshEng(true),
         mLogEngine(nullptr),
-        mMeshEngine(mEng)
+        bHasInternalLogEng(true)
 {
     // Same as above, creats a log engine
     this->mLogEngine = new LogEngine("Renderer.log", VermiLogBoth, VermiLogLevelAll);
 }
 
 Vermilion::RenderEngine::RenderEngine(LogEngine *lEng) :
-        bHasMeshEng(false),
-        bHasInternalLogEng(false),
         mCamera(nullptr),
         mMeshEngine(nullptr),
-        mLogEngine(lEng)
+        bHasMeshEng(false),
+        mLogEngine(lEng),
+        bHasInternalLogEng(false)
 {
 }
 
@@ -41,7 +41,7 @@ Vermilion::RenderEngine::RenderEngine(MeshEngine *mEng, LogEngine *lEng) :
         bHasInternalLogEng(false),
         mCamera(nullptr),
         mMeshEngine(mEng),
-        mLogEngine(lEng),
+        mLogEngine(lEng)
 { }
 
 Vermilion::RenderEngine::~RenderEngine()
@@ -66,3 +66,16 @@ void Vermilion::RenderEngine::assignEngine(MeshEngine *mEng)
     bHasMeshEng = true;
     mMeshEngine = mEng;
 }
+
+void Vermilion::RenderEngine::Draw()
+{
+	// bad impl
+	mCamera->RenderFrame();
+}
+
+void Vermilion::RenderEngine::SaveFrame(std::string name)
+{
+	mCamera->SaveFrame(name);
+}
+
+

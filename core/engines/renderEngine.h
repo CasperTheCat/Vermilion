@@ -25,7 +25,7 @@ namespace Vermilion
         LogEngine* mLogEngine;
         bool bHasInternalLogEng;
 
-
+		// IsDraw Done
 
     public:
         RenderEngine();
@@ -33,6 +33,10 @@ namespace Vermilion
         RenderEngine(LogEngine *lEng);
         RenderEngine(MeshEngine *mEng, LogEngine *lEng);
         ~RenderEngine();
+
+		void Draw();
+
+		void SaveFrame(std::string name);
 
         // Engine Assignment
         void assignEngine(MeshEngine *mEng);
