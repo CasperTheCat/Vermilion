@@ -3,26 +3,24 @@
 #include <typeinfo>
 #include "core/engines/renderEngine.h"
 
-using namespace std;
 using namespace Vermilion;
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) 
+{
+    if (argc < 2)
+    {
+        return 1;
+    }
 
-	if (argc < 2)
-	{
-		return 1;
-	}
-	string fName = argv[1];
+    std::string fName = argv[1];
 
     // We will needs to args check TBH
     // Renderer time
+    auto mEng = new MeshEngine();
+    auto rEng = new RenderEngine(mEng);
 
-
-
-	auto mEng = new MeshEngine();
-	auto rEng = new RenderEngine(mEng);
-
-	mEng->load(fName);
+    mEng->load(fName); // Get model data
+    rEng->render(mEng);
 
     return 0;
 }

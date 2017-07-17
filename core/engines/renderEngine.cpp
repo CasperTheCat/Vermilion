@@ -37,11 +37,11 @@ Vermilion::RenderEngine::RenderEngine(LogEngine *lEng) :
 }
 
 Vermilion::RenderEngine::RenderEngine(MeshEngine *mEng, LogEngine *lEng) :
-        bHasMeshEng(true),
-        bHasInternalLogEng(false),
-        mCamera(nullptr),
-        mMeshEngine(mEng),
-        mLogEngine(lEng)
+    bHasMeshEng(true),
+    bHasInternalLogEng(false),
+    mCamera(nullptr),
+    mMeshEngine(mEng),
+    mLogEngine(lEng)
 { }
 
 Vermilion::RenderEngine::~RenderEngine()
@@ -69,13 +69,13 @@ void Vermilion::RenderEngine::assignEngine(MeshEngine *mEng)
 
 void Vermilion::RenderEngine::Draw()
 {
-	// bad impl
-	mCamera->RenderFrame();
+    // bad impl
+    mCamera->RenderFrame();
 }
 
 void Vermilion::RenderEngine::SaveFrame(std::string name)
 {
-	mCamera->SaveFrame(name);
+    mCamera->SaveFrame(name);
 }
 
 

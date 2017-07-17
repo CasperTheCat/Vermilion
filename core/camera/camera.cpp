@@ -2,7 +2,11 @@
 // Created by canderson on 5/6/16.
 //
 
+// Vermilion Headers
 #include "camera.h"
+
+// BOOST headers
+#include <boost/gil/extension/dynamic_images/any_image.hpp>
 
 void Vermilion::Camera::GenerateTileSet()
 {
@@ -54,6 +58,6 @@ void Vermilion::Camera::RenderFrame()
 
 void Vermilion::Camera::SaveFrame(std::string name)
 {
-	
+    
 }
 
