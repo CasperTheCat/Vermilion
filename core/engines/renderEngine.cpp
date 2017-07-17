@@ -3,7 +3,7 @@
 //
 
 #include "renderEngine.h"
-
+#include "../camera/camera.h"
 // Since this is a render engine. We will have own logger.
 Vermilion::RenderEngine::RenderEngine() :
         mCamera(nullptr),
@@ -67,15 +67,42 @@ void Vermilion::RenderEngine::assignEngine(MeshEngine *mEng)
     mMeshEngine = mEng;
 }
 
-void Vermilion::RenderEngine::Draw()
+void Vermilion::RenderEngine::draw()
 {
-    // bad impl
-    mCamera->RenderFrame();
+    // Do we have a meshing engine?
+    if(!bHasMeshEng)
+    {
+        mLogEngine->logError("Renderer called without mesh engine");
+        return;
+    }
+
+    // Do we have a camera?
+    if(!mCamera)
+    {
+        mLogEngine->logWarn("Renderer has no camera... Defaulting");
+        // Default vars
+        Vermilion::cameraSettings vcs;
+        vcs.imageResX = 960;
+        vcs.imageResY = 540;
+        vcs.position = float3(0,0,0);
+        vcs.rotation = float3(0,0,0);
+        vcs.fBackDistance = 0.f;
+        vcs.horAngleOfView = 90.f;
+        vcs.raysPerPixel = 20;
+        vcs.rayMaxBounces = 5;
+        vcs.tileSize = 16;
+
+        // Create a default camera
+        mCamera = new Vermilion::Camera(vcs);
+    }
+
+    // This probably needs the scene to do the raycasts :P
+    mCamera->renderFrame();
 }
 
-void Vermilion::RenderEngine::SaveFrame(std::string name)
+void Vermilion::RenderEngine::saveFrame(std::string name)
 {
-    mCamera->SaveFrame(name);
+    mCamera->saveFrame(name);
 }
 
 

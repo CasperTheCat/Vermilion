@@ -9,6 +9,7 @@
 #include <vector>
 #include "../types/types.h"
 #include "frameTile/frameTile.h"
+#include <string>
 
 namespace Vermilion
 {
@@ -32,7 +33,8 @@ namespace Vermilion
 		// Image data
 		uint32_t uImageU;
 		uint32_t uImageV;
-		float4* mImage; // Used for final image post composite
+        // Used for final image post composite
+        float4* mImage; 
 
         // Camera needs a location
         float3 mPosition;
@@ -71,9 +73,9 @@ namespace Vermilion
 
         ~Camera();
 
-        void RenderFrame(); // Raytracer
+        void renderFrame(); // Raytracer
 
-		void SaveFrame(std::string name);
+		void saveFrame(std::string name);
 
     };
 

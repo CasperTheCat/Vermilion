@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 2.8)
 project(Vermilion)
 
 set(Boost_USE_STATIC_LIBS TRUE)
@@ -23,6 +23,8 @@ include_directories(
         ${Boost_INCLUDE_DIRS}
 )
 
-link_directories(${CMAKE_SOURCE_DIR}/assimp/lib)
+link_directories(${CMAKE_SOURCE_DIR}/lib)
 add_executable(Vermilion ${SOURCE_FILES})
-target_link_libraries(Vermilion assimp-vc120-mt.lib ${Boost_LIBRARIES})
+target_link_libraries(Vermilion ${CMAKE_SOURCE_DIR}/lib/libassimp.so.3.3.1 ${Boost_LIBRARIES}
+    /usr/lib64/libpng.so
+    )

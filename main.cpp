@@ -20,7 +20,9 @@ int main(int argc, char **argv)
     auto rEng = new RenderEngine(mEng);
 
     mEng->load(fName); // Get model data
-    rEng->render(mEng);
+    rEng->draw();
+    rEng->saveFrame("output");
+    
 
     return 0;
 }

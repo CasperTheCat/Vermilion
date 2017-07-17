@@ -34,9 +34,9 @@ namespace Vermilion
         RenderEngine(MeshEngine *mEng, LogEngine *lEng);
         ~RenderEngine();
 
-		void Draw();
+		void draw();
 
-		void SaveFrame(std::string name);
+		void saveFrame(std::string name);
 
         // Engine Assignment
         void assignEngine(MeshEngine *mEng);
