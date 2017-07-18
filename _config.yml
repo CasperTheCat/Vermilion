@@ -1,4 +1,5 @@
 # Setup
+url: https://github.com/CasperTheCat/Vermilion
 title:        Vermilion
 tagline:      A C++ Raytracer
 baseurl:      "/Vermilion"
