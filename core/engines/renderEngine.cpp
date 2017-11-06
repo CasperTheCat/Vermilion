@@ -82,18 +82,18 @@ void Vermilion::RenderEngine::draw()
         mLogEngine->logWarn("Renderer has no camera... Defaulting");
         // Default vars
         Vermilion::cameraSettings vcs;
-        vcs.imageResX = 960;
-        vcs.imageResY = 540;
-        vcs.position = float3(0,0,0);
+        vcs.imageResX = 250;
+        vcs.imageResY = 400;
+        vcs.position = float3(0,90,500);
         vcs.rotation = float3(0,0,0);
-        vcs.fBackDistance = 0.f;
+        vcs.fBackDistance = 10.f;
         vcs.horAngleOfView = 90.f;
-        vcs.raysPerPixel = 20;
+        vcs.raysPerPixel = 5;
         vcs.rayMaxBounces = 5;
         vcs.tileSize = 16;
 
         // Create a default camera
-        mCamera = new Vermilion::Camera(vcs);
+        mCamera = new Vermilion::Camera(vcs, mMeshEngine);
     }
 
     // This probably needs the scene to do the raycasts :P

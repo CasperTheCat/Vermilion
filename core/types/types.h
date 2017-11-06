@@ -97,6 +97,12 @@ namespace Vermilion {
             return float3(this->x + rhs.x, this->y + rhs.y, this->z + rhs.z);
         }
 
+        // FAddition
+        friend float3 operator-(float3 &lhs, float3 &rhs) {
+            return float3(lhs.x - rhs.x,
+                          lhs.y - rhs.y,
+                          lhs.z - rhs.z);
+        }
         // Subtraction
         float3 operator-(float3 &rhs) const {
             return float3(this->x - rhs.x, this->y - rhs.y, this->z - rhs.z);
@@ -105,6 +111,11 @@ namespace Vermilion {
         // Mul
         float3 operator*(float3 &rhs) const {
             return float3(this->x * rhs.x, this->y * rhs.y, this->z * rhs.z);
+        }
+
+        // Mul
+        float3 operator*(FLOAT &rhs) const {
+            return float3(this->x * rhs, this->y * rhs, this->z * rhs);
         }
 
         // Div
@@ -126,6 +137,14 @@ namespace Vermilion {
             this->x -= rhs.x;
             this->y -= rhs.y;
             this->z -= rhs.z;
+            return *this;
+        }
+
+        // Subtraction
+        float3 &operator-(FLOAT &rhs) {
+            this->x -= rhs;
+            this->y -= rhs;
+            this->z -= rhs;
             return *this;
         }
 
@@ -162,7 +181,7 @@ namespace Vermilion {
 
         /// Operators
         // Addition
-        float4 operator+(float4 &rhs) const {
+        float4 operator+(const float4 &rhs) const {
             return float4(this->x + rhs.x,
                           this->y + rhs.y,
                           this->z + rhs.z,
@@ -186,16 +205,24 @@ namespace Vermilion {
         }
 
         // Div
-        float4 operator/(float4 &rhs) const {
+        float4 operator/(const float4 &rhs) const {
             return float4(this->x + rhs.x,
                           this->y / rhs.y,
                           this->z / rhs.z,
                           this->w / rhs.w);
         }
 
+        // FAddition
+        friend float4 operator+(float4 &lhs, float4 &rhs) {
+            return float4(lhs.x + rhs.x,
+                          lhs.y + rhs.y,
+                          lhs.z + rhs.z,
+                          lhs.w + rhs.w);
+        }
+
         /// Self mods
         // Addition
-        float4 &operator+=(float4 &rhs) {
+        float4 &operator+=(const float4 &rhs) {
             this->x += rhs.x;
             this->y += rhs.y;
             this->z += rhs.z;
@@ -222,11 +249,19 @@ namespace Vermilion {
         }
 
         // Div
-        float4 &operator/=(float4 &rhs) {
+        float4 &operator/=(const float4 &rhs) {
             this->x /= rhs.x;
             this->y /= rhs.y;
             this->z /= rhs.z;
             this->w /= rhs.w;
+            return *this;
+        }
+
+        float4 &operator/(const uint32_t &rhs) {
+            this->x /= rhs;
+            this->y /= rhs;
+            this->z /= rhs;
+            this->w /= rhs;
             return *this;
         }
 

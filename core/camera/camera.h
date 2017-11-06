@@ -10,6 +10,10 @@
 #include "../types/types.h"
 #include "frameTile/frameTile.h"
 #include <string>
+#include "../engines/meshEngine.h"
+#include <mutex>
+// GLM
+#include "../../extern/glm/glm/glm.hpp"
 
 namespace Vermilion
 {
@@ -30,9 +34,11 @@ namespace Vermilion
 
     class Camera
     {
-		// Image data
-		uint32_t uImageU;
-		uint32_t uImageV;
+        std::mutex write_mutex;        
+
+	// Image data
+	uint32_t uImageU;
+	uint32_t uImageV;
         // Used for final image post composite
         float4* mImage; 
 
@@ -60,16 +66,23 @@ namespace Vermilion
         // Frame tileset for the rendergrid
         std::vector<frameTile> vTileSet;
 
+        MeshEngine *mMeshEngine;
+
+        //Stats
+        uint64_t uRaysFired;
+        uint64_t uRaysHit;
 
         /// Rays are spawned from camera origin and trace based on rotation
         /// Default camera alignment is along X
 
-		// Functions
-		void GenerateTileSet();
-		void RenderTile(frameTile &rTile);
+	// Functions
+	void GenerateTileSet();
+	void RenderTile(frameTile &rTile);
+        bool rayShadowCast(glm::vec3 pos, glm::vec3 dir);
+        Vermilion::float4 rayCast(float3 start, float3 rotation, float ofx, float ofy, bool recursive);
 
     public:
-        Camera(cameraSettings &_settings);
+        Camera(cameraSettings &_settings, MeshEngine *mEng);
 
         ~Camera();
 
