@@ -1,7 +1,12 @@
 #pragma once
 
 #include <math.h>
+#ifdef __CUDACC__
 #include <cuda_runtime.h> // for __host__  __device__
+#else
+#define __host__
+#define __device__
+#endif
 
 #define FW_ASSERT(X) ((void)0) 
 // FW_ASSERT(X) ((X) ? ((void)0) : FW::fail("Assertion failed!\n%s:%d\n%s", __FILE__, __LINE__, #X)) in DEBUG

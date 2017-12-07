@@ -4,6 +4,7 @@
 #include "../nvidia/Util.h"
 #include "../nvidia/BVH.h"
 #include "../nvidia/Scene.h"
+#include "../nvidia/CudaBVH.h"
 #include "../nvidia/Array.h"
 
 Vermilion::MeshEngine::MeshEngine()
@@ -244,17 +245,13 @@ void Vermilion::MeshEngine::createBVH()
 
 		Scene* scene = new Scene(mesh.nTris, mesh.nVerts, tris, verts);
 
-
 		Platform defaultPlatform;
 		BVH::BuildParams defaultParams;
 		BVH::Stats stats;
-		BVH meshBVH(scene, defaultPlatform, defaultParams);
+		BVH BVHParams(scene, defaultPlatform, defaultParams);
 
 		// Create a BVH
-		gpuBVH = new CudaBVH(meshBVH, BVHLayout_Compact2);
-
-		
-
+		auto meshBVH = new CudaBVH(BVHParams, BVHLayout_Compact2);
 	}
 
 
