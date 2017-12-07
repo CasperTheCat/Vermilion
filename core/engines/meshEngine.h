@@ -68,6 +68,7 @@ namespace Vermilion
 		void processSceneLights();
 		void processSceneCameras();
 		void processSceneMaterials();
+		void createBVH();
         
     public:
         // Methods    

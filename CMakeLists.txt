@@ -12,10 +12,11 @@ if (OPENMP_FOUND)
 endif() 
 
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/Modules/")
+MESSAGE( STATUS "CMAKE_SOURCE_DIR:         " ${CMAKE_SOURCE_DIR} )
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -Ofast -Wall -ggdb")
-FIND_PACKAGE(Boost COMPONENTS system filesystem REQUIRED)
-FIND_PACKAGE(OpenEXR)
+#FIND_PACKAGE(Boost COMPONENTS system filesystem REQUIRED)
+#FIND_PACKAGE(OpenEXR)
 FIND_PACKAGE(OpenImageIO REQUIRED)
 
 set(SOURCE_FILES main.cpp
@@ -42,5 +43,4 @@ include_directories(
 link_directories(${CMAKE_SOURCE_DIR}/lib)
 add_executable(Vermilion ${SOURCE_FILES})
 target_link_libraries(Vermilion ${CMAKE_SOURCE_DIR}/lib/libassimp.so.3.3.1 ${Boost_LIBRARIES} ${OIIO_LIBRARIES}
-    /usr/lib64/libpng.so
     )

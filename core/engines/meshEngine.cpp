@@ -56,7 +56,6 @@ bool Vermilion::MeshEngine::load(std::string& fName)
 
 bool Vermilion::MeshEngine::load(std::string& fName, int flags)
 {
-
 	// Check for the file's existance!
 	std::ifstream fCheck(fName.c_str());
 
@@ -217,7 +216,13 @@ void Vermilion::MeshEngine::processSceneTextures()
 
 
 
-
+void Vermilion::MeshEngine::createBVH()
+{
+	for(VermiMesh mesh : sceneVermiMeshes)
+	{
+		
+	}
+}
 
 bool Vermilion::MeshEngine::processScene()
 {
@@ -239,6 +244,8 @@ bool Vermilion::MeshEngine::processScene()
 	processSceneLights();
 	processSceneCameras();
 	processSceneMaterials();
+
+	createBVH();
 
 	return true;
 }
