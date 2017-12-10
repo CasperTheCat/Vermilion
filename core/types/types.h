@@ -5,6 +5,8 @@
 #ifndef VERMILION_TYPES_H
 #define VERMILION_TYPES_H
 
+#include "../../extern/glm/glm/vec3.hpp"
+
 namespace Vermilion {
 
 // Floating point type.
@@ -13,6 +15,8 @@ namespace Vermilion {
 #else
     typedef double FLOAT;
 #endif
+
+
 
 // This file contains the code for any engine types
 // Namely multidimensional floats
@@ -90,6 +94,11 @@ namespace Vermilion {
         float3(FLOAT nx, FLOAT ny, FLOAT nz) : x(nx), y(ny), z(nz) { }
 
         float3() { }
+
+        glm::vec3 tovec3()
+        {
+            return glm::vec3(this->x, this->y, this->z);
+        }
 
         /// Operators
         // Addition

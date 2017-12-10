@@ -2,9 +2,7 @@
 
 #include "meshEngine.h"
 #include "../nvidia/Util.h"
-#include "../nvidia/BVH.h"
 #include "../nvidia/Scene.h"
-#include "../nvidia/CudaBVH.h"
 #include "../nvidia/Array.h"
 
 Vermilion::MeshEngine::MeshEngine()
@@ -218,47 +216,59 @@ void Vermilion::MeshEngine::processSceneTextures()
 	}
 }
 
-
-
-
-void Vermilion::MeshEngine::createBVH()
+Vermilion::MeshEngine::createBVH()
 {
+	Array<Scene::Triangle> tris;
+
 	for(VermiMesh mesh : sceneVermiMeshes)
 	{
-		Array<Scene::Triangle> tris;
-		Array<Vec3f> verts;
 
-		tris.clear();
-		verts.clear();
-		
 		for(uint32_t i = 0; i < mesh.nTris; ++i)
 		{
 			Scene::Triangle tri;
 			tri.vertices = Vec3i( mesh.indices[i * 3], mesh.indices[i * 3 + 1], mesh.indices[i * 3 + 2]);
 			tris.add(tri);
 		}
-
-		for(uint32_t i = 0; i < mesh.nVerts; ++i)
-		{
-			verts.add(Vec3f(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z));
-		}
-
-		Scene* scene = new Scene(mesh.nTris, mesh.nVerts, tris, verts);
-
-		Platform defaultPlatform;
-		BVH::BuildParams defaultParams;
-		BVH::Stats stats;
-		BVH BVHParams(scene, defaultPlatform, defaultParams);
-
-		// Create a BVH
-		auto meshBVH = new CudaBVH(BVHParams, BVHLayout_Compact2);
 	}
 
-
-
-
-
+	sceneBVH = new BVH(&tris);
 }
+
+
+//void Vermilion::MeshEngine::createBVH()
+//{
+//	for(VermiMesh mesh : sceneVermiMeshes)
+//	{
+//		Array<Scene::Triangle> tris;
+//		Array<Vec3f> verts;
+//
+//		tris.clear();
+//		verts.clear();
+//		
+//		for(uint32_t i = 0; i < mesh.nTris; ++i)
+//		{
+//			Scene::Triangle tri;
+//			tri.vertices = Vec3i( mesh.indices[i * 3], mesh.indices[i * 3 + 1], mesh.indices[i * 3 + 2]);
+//			tris.add(tri);
+//		}
+//
+//		for(uint32_t i = 0; i < mesh.nVerts; ++i)
+//		{
+//			verts.add(Vec3f(mesh.vertices[i].x, mesh.vertices[i].y, mesh.vertices[i].z));
+//		}
+//
+//		Scene* scene = new Scene(mesh.nTris, mesh.nVerts, tris, verts);
+//
+//		Platform defaultPlatform;
+//		BVH::BuildParams defaultParams;
+//		BVH::Stats stats;
+//		BVH cpuBVH(scene, defaultPlatform, defaultParams);
+//
+//		// Create a BVH
+//		auto meshBVH = new CudaBVH(cpuBVH, BVHLayout_Compact2);
+//		sceneBVHs.push_back(meshBVH);
+//	}
+//}
 
 bool Vermilion::MeshEngine::processScene()
 {

@@ -10,6 +10,8 @@
 #include "loggingEngine.h"
 #include "../types/types.h"
 
+#include "../bvh/BVH.h"
+
 namespace Vermilion
 {
 	struct VermiMesh
@@ -54,6 +56,9 @@ namespace Vermilion
 
 		// Camera Data
 		std::vector<aiCamera*> sceneCameras;
+
+		// BVH
+		BVH* sceneBVH;
         
     private:
         // Methods

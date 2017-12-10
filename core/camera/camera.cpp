@@ -3,7 +3,6 @@
 //
 #include <memory>
 #include <cmath>
-#include <random>
 
 // Vermilion Headers
 #include "camera.h"
@@ -16,6 +15,25 @@
 // BOOST PNG FIX
 //#define png_infopp_NULL (png_infopp)NULL
 //#define int_p_NULL (int *)NULL
+
+enum class Refl_t : uint8_t 
+{
+    DIFF,
+    METAL,
+    SPEC,
+    REFR,
+    COAT
+};
+
+struct BVHTravel 
+{
+    uint32_t i;
+    float mint;
+    BVHTravel(){}
+    BVHTravel(int _i, float _mint) : i(_i), mint(_mint) {}
+};
+
+
 
 void Vermilion::Camera::GenerateTileSet()
 {
@@ -34,7 +52,7 @@ void Vermilion::Camera::GenerateTileSet()
 }
 
 
-Vermilion::Camera::Camera(cameraSettings& _settings, MeshEngine *mEng)
+Vermilion::Camera::Camera(cameraSettings& _settings, MeshEngine *mEng) : mtRanEngine(time(0)), distrib(0, 1)
 {
     uRaysFired = 0;
     uRaysHit = 0;
@@ -48,11 +66,13 @@ Vermilion::Camera::Camera(cameraSettings& _settings, MeshEngine *mEng)
 	uTileSize = _settings.tileSize;
 	uImageU = _settings.imageResX;
 	uImageV = _settings.imageResY;
+    mUp = float3(0,1,0);
+    mFocalDistance = 0.5f;
 
     //GenerateTileSet(); // Don't actually do this...
     // Instead have an X by Y image and just render in buckets...
 
-    mImage = new float4[uImageU * uImageV];
+    mImage = new glm::vec4[uImageU * uImageV];
     
     // Image is currently junk, zero it out?
 
@@ -302,85 +322,267 @@ bool recursive = false)
 
 }
 
+glm::vec4 Vermilion::Camera::renderKernel(glm::vec3 oriInWS, glm::vec3 rayInWS)
+{
+    glm::vec3 accum = glm::vec3(0.9,0.5,0.05);
+    glm::vec3 mask = glm::vec3(1);
+    glm::vec3 direct = glm::vec3(0);
+    bool bHasHit = false;
+
+    for(uint32_t bounce = 0; bounce < uMaxBounces; ++bounce)
+    {
+        int hitTriIdx = -1;
+        int bestTriIdx = -1;
+        float hitDist = 1e20;
+        float st = 1e20;
+        glm::vec3 objCol = glm::vec3(0);
+        glm::vec3 emit = glm::vec3(0);
+        glm::vec3 hitPoint = glm::vec3(0);
+        glm::vec3 normal = glm::vec3(0);
+        glm::vec3 orientedNormal = glm::vec3(0);
+        glm::vec3 nextDir = glm::vec3(0);
+        glm::vec3 triNormal = glm::vec3(0);
+        Refl_t reflType;
+        float ray_tmin = 0.00001f;
+        float ray_tmax = 1e20;
+
+        //bHasHit = intersectBVH(oriInWS, rayInWS, bestTriIdx, hitDist, triNormal);
+        IntersectionInfo hitInfo;
+        bHasHit = sceneBVH.getIntersection(oriInWS, rayInWS, &hitInfo, false);
+        if(!bHasHit) break;
+        hitDist = hitInfo.t;
+        triNormal = hitInfo.object.getNormal();
+
+        float t = 0.5f * (rayInWS.y + 1.2f);
+        Vec3f skycolor = Vec3f(1.0f, 1.0f, 1.0f) * (1.0f - t) + Vec3f(0.9f, 0.3f, 0.0f) * t;
+        
+        st = hitDist;
+        hitTriIdx = bestTriIdx;
+
+
+
+        {
+            hitPoint = oriInWS + rayInWS * st;
+
+            normal = glm::normalize(triNormal);
+            orientedNormal = (glm::dot(normal, rayInWS) < 0) ? normal : normal * glm::vec3(-1);
+
+            glm::vec3 col = glm::vec3(1);
+
+            reflType = Refl_t::REFR;
+            objCol = glm::vec3(0);
+            emit = glm::vec3(0);
+            accum += (mask * emit);
+        }
+        
+
+        if(reflType == Refl_t::DIFF)
+        {
+            float phi = 2 * M_PI * distrib(mtRanEngine);
+            float r2 = distrib(mtRanEngine);
+            float r2s = sqrtf(r2);
+
+            // Compute orthonormal
+            glm::vec3 w = orientedNormal;
+            glm::vec3 u = glm::normalize(glm::cross((fabs(w.x) > .1 ? glm::vec3(0,1,0) : glm::vec3(1,0,0)), w));
+            glm::vec3 v = glm::cross(w,u);
+
+            // Compute cosine
+            //nextDir = u*cosf(phi)*r2s + v*sinf(phi)*r2s + w*sqrtf(1-r2);
+
+        }
+        if(reflType == Refl_t::SPEC)
+        {
+            nextDir = glm::normalize(rayInWS - normal * glm::dot(normal, rayInWS) * 2.0f);
+            hitPoint += orientedNormal * 0.001f;
+            mask *= objCol;
+        }
+        if(reflType == Refl_t::REFR)
+        {
+            bool into = glm::dot(normal, orientedNormal) > 0;
+            float nc = 1.0f;
+            float nt = 1.5f;
+            float nnt = into ? nc / nt : nt / nc;
+            float ddn = glm::dot(rayInWS, orientedNormal);
+            float cos2t = 1.0f - nnt*nnt * (1.f - ddn*ddn);
+
+            if(cos2t < 0.0f)
+            {
+                nextDir = glm::normalize(rayInWS - normal * glm::vec3(2) * glm::dot(normal, rayInWS));
+                hitPoint += orientedNormal * 0.001f;
+            }
+            else
+            {
+                // compute direction of transmission ray
+				glm::vec3 tdir = rayInWS * nnt;
+				tdir -= normal * ((into ? 1 : -1) * (ddn*nnt + sqrtf(cos2t)));
+				tdir = glm::normalize(tdir);
+
+				float R0 = (nt - nc)*(nt - nc) / (nt + nc)*(nt + nc);
+				float c = 1.f - (into ? -ddn : glm::dot(tdir, normal));
+				float Re = R0 + (1.f - R0) * c * c * c * c * c;
+				float Tr = 1 - Re; // Transmission
+				float P = .25f + .5f * Re;
+				float RP = Re / P;
+				float TP = Tr / (1.f - P);
+
+				// randomly choose reflection or transmission ray
+				if (distrib(mtRanEngine) < 0.2f) // reflection ray
+				{
+					//mask *= RP;
+					nextDir = glm::normalize(rayInWS - normal * glm::vec3(2) * dot(normal, rayInWS));
+
+					hitPoint += orientedNormal * glm::vec3(0.001f); // scene size dependent
+				}
+				else // transmission ray
+				{
+					//mask *= TP;
+					nextDir = glm::normalize(tdir);
+
+					hitPoint += orientedNormal * glm::vec3(0.001f); // epsilon must be small to avoid artefacts
+                }
+            }
+        }
+
+        oriInWS = hitPoint;
+        rayInWS = nextDir;
+    }
+
+    return glm::vec4(accum, bHasHit);
+}
 
 void Vermilion::Camera::renderFrame()
 {
+    // Random
+
+
+    // YawPitchRoll
+    float xDir = sin(mRotation.x) * cos(mRotation.y);
+    float yDir = sin(mRotation.y);
+    float zDir = cos(mRotation.x) * cos(mRotation.y);
+    glm::vec3 directionToCamera = glm::vec3(xDir,yDir,zDir);
+    glm::vec3 viewDirection = glm::normalize(directionToCamera * glm::vec3(-1));
+    glm::vec3 eyePos = mPosition.tovec3() + directionToCamera * glm::vec3(4);
+
+    glm::vec3 mid = eyePos + viewDirection;
+    glm::vec3 horAxis = glm::normalize(glm::cross(viewDirection, mUp.tovec3()));
+    glm::vec3 verAxis = glm::normalize(glm::cross(horAxis, viewDirection));
+
+    //auto temp = (direction * mDistToFilm);
+
+    // Later, bin the pixel grid
+#pragma omp parallel for
+    for( int64_t pix = 0; pix < uImageU * uImageV; ++pix)
+    {
+        glm::vec4 accum = glm::vec4(0);
+        int px = pix % uImageU;
+        int py = uImageV - (pix / uImageU);
+
+        //glm::vec3 cx = glm::vec3(uImageU * fAngleOfView / uImageV, 0, 0);
+        //glm::vec3 cy = glm::cross(cx, viewDirection);
+        //cy = glm::normalize(cy);
+
+        for(uint32_t s = 0; s < uSamplesPerPixel; ++s)
+        {
+            auto jitterX = distrib(mtRanEngine) - 0.5;
+            auto jitterY = distrib(mtRanEngine) - 0.5;
+            
+            auto sX = (jitterX + px) / (uImageU - 1);
+            auto sY = (jitterY + py) / (uImageV - 1);
+
+            glm::vec3 pointOnPlane = mid + (horAxis * glm::vec3(( 2 * sX) - 1)) + (verAxis * glm::vec3((2 * sY) - 1));
+            glm::vec3 pointOnImagePlane = eyePos + ((pointOnPlane - eyePos) * mFocalDistance);
+            
+            // Skip aperture
+            glm::vec3 originInWS = eyePos;
+
+            glm::vec3 rayInWS = glm::normalize(pointOnImagePlane - originInWS);
+
+            accum += renderKernel(originInWS, rayInWS) * glm::vec4(1.0 / uSamplesPerPixel);
+        }
+        mImage[pix] = accum;
+    }
+
+}
+
+//void Vermilion::Camera::renderFrame()
+//{
 	// Make each of tiles render. This is serial for now because threading...
     // No buckets currently
 
     // random sampler
-    std::mt19937 mtRanEngine(time(0));
-    std::uniform_real_distribution<float> distrib(0, 1);
+    //std::mt19937 mtRanEngine(time(0));
+    //std::uniform_real_distribution<float> distrib(0, 1);
 
-    float3 direction = float3(0,0,-1);
+    //float3 direction = float3(0,0,-1);
 
     //float fOffX;
     //float fOffY;
     //float4 accum = float4(0,0,0,0);
     
     // Camera Position is mPosition less fBackDist*direction
-    auto temp = (direction * mDistToFilm); // No offset for grid yet, move by grid
+    //auto temp = (direction * mDistToFilm); // No offset for grid yet, move by grid
     //float3 camPos = mPosition;
     //camPos.x -= temp.x;
     //camPos.y -= temp.y;
     //camPos.z -= temp.z;
 
-#pragma omp parallel for
-    for( int64_t p = 0; p < uImageU * uImageV; ++p)
-    {
-        // raycasts per pixel
-        float4 accum = float4(0,0,0,0);
-        //for(uint32_t i = 0; i < uSamplesPerPixel; ++i)
-        //{
-        //    // Take 1 and div by samples
-        //    float fOffX = (((p % uImageU) - (uImageU / 2)) + distrib(mtRanEngine) - 0.5) * 0.01;
-        //    float fOffY = (((p / uImageU) - (uImageV / 2)) + distrib(mtRanEngine) - 0.5) * 0.01; 
-        //    
-        //    accum = accum + rayCast(
-        //            mPosition,
-        //            float3(fOffX, -fOffY, -mDistToFilm),
-        //            fOffX,
-        //            fOffY,
-        //            true
-        //    );
-        //}
-
-        //accum /= uSamplesPerPixel;
-        float fOffX = (((p % uImageU) - (uImageU / 2))/* + distrib(mtRanEngine) - 0.5*/) * 0.01;
-        float fOffY = (((p / uImageU) - (uImageV / 2))/* + distrib(mtRanEngine) - 0.5*/) * 0.01; 
-        mImage[p] = rayCast(
-            mPosition,
-            float3(fOffX, -fOffY, -mDistToFilm),
-            0,
-            0,
-            true
-            );
-        
-        //mImage[p] = accum / uSamplesPerPixel;
-        {
-            std::unique_lock<std::mutex> lock(write_mutex);
-            if(p % 1000 == 0.f)
-                std::cout << p << " of " << uImageU * uImageV << std::endl;
-        }
-
-        //mImage[p] = float4(0.89f,0.2588f,0.204f,0.f);
-        //mImage[p] = float4(
-        //        p / float(uImageU * uImageV),
-        //p / float(uImageU * uImageV),
-        //        p / float(uImageU * uImageV),
-        //        0.f
-        //        );
-
-    }
-
-    std::cout << uRaysHit << " rays hit out of " << uRaysFired << " rays fired" << std::endl;
-
-	//for (auto t = 0; t < vTileSet.size(); t++)
-    //{
-    //    printf("Rendering Tile %d of %d\n",t, vTileSet.size());
-	//	RenderTile(vTileSet[t]);
-    //}
-}
+//#pragma omp parallel for
+//    for( int64_t p = 0; p < uImageU * uImageV; ++p)
+//    {
+//        // raycasts per pixel
+//        float4 accum = float4(0,0,0,0);
+//        //for(uint32_t i = 0; i < uSamplesPerPixel; ++i)
+//        //{
+//        //    // Take 1 and div by samples
+//        //    float fOffX = (((p % uImageU) - (uImageU / 2)) + distrib(mtRanEngine) - 0.5) * 0.01;
+//        //    float fOffY = (((p / uImageU) - (uImageV / 2)) + distrib(mtRanEngine) - 0.5) * 0.01; 
+//        //    
+//        //    accum = accum + rayCast(
+//        //            mPosition,
+//        //            float3(fOffX, -fOffY, -mDistToFilm),
+//        //            fOffX,
+//        //            fOffY,
+//        //            true
+//        //    );
+//        //}
+//
+//        //accum /= uSamplesPerPixel;
+//        float fOffX = (((p % uImageU) - (uImageU / 2))/* + distrib(mtRanEngine) - 0.5*/) * 0.01;
+//        float fOffY = (((p / uImageU) - (uImageV / 2))/* + distrib(mtRanEngine) - 0.5*/) * 0.01; 
+//        mImage[p] = rayCast(
+//            mPosition,
+//            float3(fOffX, -fOffY, -mDistToFilm),
+//            0,
+//            0,
+//            true
+//            );
+//        
+//        //mImage[p] = accum / uSamplesPerPixel;
+//        {
+//            std::unique_lock<std::mutex> lock(write_mutex);
+//            if(p % 1000 == 0.f)
+//                std::cout << p << " of " << uImageU * uImageV << std::endl;
+//        }
+//
+//        //mImage[p] = float4(0.89f,0.2588f,0.204f,0.f);
+//        //mImage[p] = float4(
+//        //        p / float(uImageU * uImageV),
+//        //p / float(uImageU * uImageV),
+//        //        p / float(uImageU * uImageV),
+//        //        0.f
+//        //        );
+//
+//    }
+//
+//    std::cout << uRaysHit << " rays hit out of " << uRaysFired << " rays fired" << std::endl;
+//
+//	//for (auto t = 0; t < vTileSet.size(); t++)
+//    //{
+//    //    printf("Rendering Tile %d of %d\n",t, vTileSet.size());
+//	//	RenderTile(vTileSet[t]);
+//    //}
+//}
 
 void Vermilion::Camera::saveFrame(std::string name)
 {
@@ -405,4 +607,6 @@ void Vermilion::Camera::saveFrame(std::string name)
 
     delete outFrame;
 }
+
+
 
