@@ -18,6 +18,17 @@
 namespace Vermilion
 {
 
+	enum class vermRenderMode
+	{
+		RGB,
+		RGBA,
+		RGBAZ,
+		Depth,
+		Depth64,
+
+		TOTAL_RENDER_MODES
+	};
+
     struct cameraSettings
     {
         // used for camera settings
@@ -30,23 +41,38 @@ namespace Vermilion
         uint32_t raysPerPixel;
         uint32_t rayMaxBounces;
 		uint32_t tileSize;
+		vermRenderMode renderMode;
     };
+
+	struct pixelValue
+	{
+		uint64_t pixel; // 8
+		float red;
+		float green;	// 8
+		float blue;
+		float alpha;	// 8
+		float depth;
+		float light;	// 8
+	};
 
     class Camera
     {
         std::mutex write_mutex;        
 
-	// Image data
-	uint32_t uImageU;
-	uint32_t uImageV;
+	public:
+		// Image data
+		uint32_t uImageU;
+		uint32_t uImageV;
+
+		uint64_t RenderTargetSize;
         // Used for final image post composite
-        float4* mImage; 
+        float* mImage; 
 
         // Camera needs a location
-        float3 mPosition;
+        glm::vec3 mPosition;
 
         // Camera also needs a rotation
-        float3 mRotation;
+		glm::vec3 mRotation;
 
         // it also needs a distance to the pixel grid
         FLOAT mDistToFilm;
@@ -72,22 +98,23 @@ namespace Vermilion
         uint64_t uRaysFired;
         uint64_t uRaysHit;
 
+		vermRenderMode renderMode;
+
         /// Rays are spawned from camera origin and trace based on rotation
         /// Default camera alignment is along X
-
+    private:
 	// Functions
 	void GenerateTileSet();
 	void RenderTile(frameTile &rTile);
-        bool rayShadowCast(glm::vec3 pos, glm::vec3 dir);
-        Vermilion::float4 rayCast(float3 start, float3 rotation, float ofx, float ofy, bool recursive);
+    bool rayShadowCast(glm::vec3 pos, glm::vec3 dir);
+    Vermilion::float4 rayCast(float3 start, float3 rotation, float ofx, float ofy, bool recursive);
 
     public:
-        Camera(cameraSettings &_settings, MeshEngine *mEng);
+        Camera(cameraSettings &_settings);
 
         ~Camera();
 
-        void renderFrame(); // Raytracer
-
+		void setPixelValue(pixelValue &newPixelValue);
 		void saveFrame(std::string name);
 
     };

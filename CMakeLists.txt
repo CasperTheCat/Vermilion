@@ -1,23 +1,28 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 project(Vermilion)
 
 set(Boost_USE_STATIC_LIBS TRUE)
 set(Boost_USE_MULTITHREADED TRUE)
 set(Boost_USE_STATIC_RUNTIME FALSE)
 
-find_package(OpenMP) 
-if (OPENMP_FOUND) 
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}") 
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}") 
-endif() 
-
+set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/Modules/")
 MESSAGE( STATUS "CMAKE_SOURCE_DIR:         " ${CMAKE_SOURCE_DIR} )
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fopenmp -Ofast -Wall -ggdb")
+
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -Wall -ggdb")
 #FIND_PACKAGE(Boost COMPONENTS system filesystem REQUIRED)
 #FIND_PACKAGE(OpenEXR)
-FIND_PACKAGE(OpenImageIO REQUIRED)
+#FIND_PACKAGE(OpenImageIO REQUIRED)
+#FIND_PACKAGE(OpenImageIO)
+
 
 set(SOURCE_FILES main.cpp
         core/engines/renderEngine.cpp

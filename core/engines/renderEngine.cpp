@@ -6,7 +6,6 @@
 #include "../camera/camera.h"
 // Since this is a render engine. We will have own logger.
 Vermilion::RenderEngine::RenderEngine() :
-        mCamera(nullptr),
         mMeshEngine(nullptr),
         bHasMeshEng(false),
         bHasInternalLogEng(true)
@@ -17,7 +16,7 @@ Vermilion::RenderEngine::RenderEngine() :
 }
 
 Vermilion::RenderEngine::RenderEngine(MeshEngine *mEng) :
-        mCamera(nullptr),
+
         mMeshEngine(mEng),
         bHasMeshEng(true),
         mLogEngine(nullptr),
@@ -28,7 +27,6 @@ Vermilion::RenderEngine::RenderEngine(MeshEngine *mEng) :
 }
 
 Vermilion::RenderEngine::RenderEngine(LogEngine *lEng) :
-        mCamera(nullptr),
         mMeshEngine(nullptr),
         bHasMeshEng(false),
         mLogEngine(lEng),
@@ -39,16 +37,17 @@ Vermilion::RenderEngine::RenderEngine(LogEngine *lEng) :
 Vermilion::RenderEngine::RenderEngine(MeshEngine *mEng, LogEngine *lEng) :
     bHasMeshEng(true),
     bHasInternalLogEng(false),
-    mCamera(nullptr),
     mMeshEngine(mEng),
     mLogEngine(lEng)
-{ }
+{
+}
 
 Vermilion::RenderEngine::~RenderEngine()
 {
     // The only data we have to remove currently is the camera and the log engine if it is internal
     if (bHasInternalLogEng) delete mLogEngine;
-    if (mCamera) delete mCamera;
+	for (uint32_t i = 0; i < mCameras.size(); ++i)
+		if (mCameras[i]) delete mCameras[i];
 }
 
 void Vermilion::RenderEngine::assignEngine(LogEngine *lEng)
@@ -76,8 +75,13 @@ void Vermilion::RenderEngine::draw()
         return;
     }
 
+	if(!mIntegrator)
+	{
+		mIntegrator = new BruteForceTracer();
+	}
+
     // Do we have a camera?
-    if(!mCamera)
+    if(mCameras.empty())
     {
         mLogEngine->logWarn("Renderer has no camera... Defaulting");
         // Default vars
@@ -91,18 +95,20 @@ void Vermilion::RenderEngine::draw()
         vcs.raysPerPixel = 5;
         vcs.rayMaxBounces = 5;
         vcs.tileSize = 16;
-
+		vcs.renderMode = vermRenderMode::RGBAZ;
         // Create a default camera
-        mCamera = new Vermilion::Camera(vcs, mMeshEngine);
+		mCameras.push_back(new Vermilion::Camera(vcs));
     }
 
     // This probably needs the scene to do the raycasts :P
-    mCamera->renderFrame();
+    //mCamera->renderFrame();
+	mIntegrator->Render(mCameras, mMeshEngine);
+
 }
 
 void Vermilion::RenderEngine::saveFrame(std::string name)
 {
-    mCamera->saveFrame(name);
+    //mCamera->saveFrame(name);
 }
 
 

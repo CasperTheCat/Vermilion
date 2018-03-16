@@ -79,6 +79,107 @@ bool Vermilion::MeshEngine::load(std::string& fName, int flags)
 	return processScene();
 }
 
+inline float triangleIntersect(const glm::vec3 &pos, const glm::vec3 &rot, const glm::vec3 &v0,const glm::vec3 &v1,const glm::vec3 &v2)
+{
+	using namespace glm;
+	// Triangle Intersection REMOVE FOR PUSH
+	vec3 e1 = v1 - v0;
+	vec3 e2 = v2 - v0;
+	// Calculate planes normal vector
+	vec3 pvec = cross(rot, e2);
+	float det = dot(e1, pvec);
+
+	// Ray is parallel to plane
+	if (det < 1e-8 && det > -1e-8) {
+		return 0;
+	}
+
+	float inv_det = 1 / det;
+	vec3 tvec = pos - v0;
+	float u = dot(tvec, pvec) * inv_det;
+	if (u < 0 || u > 1) {
+		return 0;
+	}
+
+	vec3 qvec = cross(tvec, e1);
+	float v = dot(rot, qvec) * inv_det;
+	if (v < 0 || u + v > 1) {
+		return 0;
+	}
+	return dot(e2, qvec) * inv_det;
+}
+
+bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& rayDirection,
+	aiMaterial** ppImpactMaterial, glm::vec3 *pHitLocation, glm::vec3 *pHitNormal, float *pHitDistance)
+{
+	// Doesn't use BVH.
+
+	const glm::vec3 lightDirection = glm::vec3(-0.5f, 0.f, 0.5f);
+	//const float3 lightDirection_f3 = float3(-0.5f,1.f,0.5f);
+	auto temp = 0;
+	glm::vec3 v0;
+	glm::vec3 v1;
+	glm::vec3 v2;
+
+	FLOAT nearestHit = INFINITY;
+	FLOAT testHit = 0.f;
+	uint32_t hitMeshIndex = 0;
+
+	for (uint32_t x = 0; x < sceneMeshes.size(); ++x)
+	{
+		aiMesh *mesh = sceneMeshes[x];
+		for (uint32_t i = 0; i < mesh->mNumFaces; ++i)
+		{
+			// Get the face data
+			temp = mesh->mFaces[i].mIndices[0];
+			v0.x = mesh->mVertices[temp].x;
+			v0.y = mesh->mVertices[temp].y;
+			v0.z = mesh->mVertices[temp].z;
+
+			temp = mesh->mFaces[i].mIndices[1];
+			v1.x = mesh->mVertices[temp].x;
+			v1.y = mesh->mVertices[temp].y;
+			v1.z = mesh->mVertices[temp].z;
+
+			temp = mesh->mFaces[i].mIndices[2];
+			v2.x = mesh->mVertices[temp].x;
+			v2.y = mesh->mVertices[temp].y;
+			v2.z = mesh->mVertices[temp].z;
+
+			//printf("%f,%f,%f\n",v2.x,v2.y,v2.z);
+
+			glm::vec3 vU = v1 - v0;
+			glm::vec3 vV = v2 - v0;
+			glm::vec3 vNorm;
+			vNorm.x = (vU.y * vV.z) - (vU.z * vV.y);
+			vNorm.y = (vU.z * vV.x) - (vU.x * vV.z);
+			vNorm.z = (vU.x * vV.y) - (vU.y * vV.x);
+
+			//if(recursive)
+			vNorm = vNorm * glm::vec3(-1, -1, -1);
+
+			if (glm::dot(rayDirection, vNorm) > 0.f)
+				continue;
+			
+			testHit = triangleIntersect(rayStart, rayDirection, v0, v1, v2);
+			if (testHit > 0.01f && testHit < nearestHit) // EpsilonCheck
+			{
+				nearestHit = testHit;
+				hitMeshIndex = mesh->mMaterialIndex;
+				*pHitNormal = vNorm;
+			}
+		}
+	}
+
+
+	// Setup returns
+	*ppImpactMaterial = pScene->mMaterials[hitMeshIndex];
+	*pHitLocation = rayStart + (rayDirection * nearestHit);
+	*pHitDistance = nearestHit;
+	return nearestHit < INFINITY;
+}
+
+
 void Vermilion::MeshEngine::processUnsupported()
 {
 	// Report any unsupported features

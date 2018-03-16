@@ -7,6 +7,7 @@
 
 #include "../camera/camera.h"
 #include "meshEngine.h"
+#include "../integrators/integrators.h"
 
 
 namespace Vermilion
@@ -14,18 +15,20 @@ namespace Vermilion
     // This class handles scene and camera logic
     class RenderEngine
     {
-        // Scene needs a render camera!
-        Camera* mCamera;
+        // Scene needs a render camera
+        std::vector<Camera *> mCameras;
 
         // MeshEngine for loading meshes
         MeshEngine* mMeshEngine;
         bool bHasMeshEng;
 
+		// Actual Code used to render
+		Integrator *mIntegrator;
+
         // Logging engine to log directly from here
         LogEngine* mLogEngine;
         bool bHasInternalLogEng;
 
-		// IsDraw Done
 
     public:
         RenderEngine();

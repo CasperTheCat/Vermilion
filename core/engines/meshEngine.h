@@ -9,6 +9,7 @@
 #include "../../extern/assimp/cimport.h"
 #include "loggingEngine.h"
 #include "../types/types.h"
+#include "../camera/camera.h"
 
 namespace Vermilion
 {
@@ -81,7 +82,7 @@ namespace Vermilion
 		// Load Mesh + Overloads
 		bool load(std::string& fName);
 		bool load(std::string& fName, int flags);
-        
+	    bool RayCast(const glm::vec3& rayStart, const glm::vec3& rayDirection, aiMaterial **ppImpactMaterial, glm::vec3 *pHitLocation, glm::vec3 *pHitNormal, float *pHitDistance);
     };
 }
 
