@@ -114,8 +114,6 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 {
 	// Doesn't use BVH.
 
-	const glm::vec3 lightDirection = glm::vec3(-0.5f, 0.f, 0.5f);
-	//const float3 lightDirection_f3 = float3(-0.5f,1.f,0.5f);
 	auto temp = 0;
 	glm::vec3 v0;
 	glm::vec3 v1;
@@ -166,16 +164,20 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 			{
 				nearestHit = testHit;
 				hitMeshIndex = mesh->mMaterialIndex;
-				*pHitNormal = vNorm;
+				if(pHitNormal)
+					*pHitNormal = vNorm;
 			}
 		}
 	}
 
 
 	// Setup returns
-	*ppImpactMaterial = pScene->mMaterials[hitMeshIndex];
-	*pHitLocation = rayStart + (rayDirection * nearestHit);
-	*pHitDistance = nearestHit;
+	if(ppImpactMaterial)
+		*ppImpactMaterial = pScene->mMaterials[hitMeshIndex];
+	if(pHitLocation)
+		*pHitLocation = rayStart + (rayDirection * nearestHit);
+	if(pHitDistance)
+		*pHitDistance = nearestHit;
 	return nearestHit < INFINITY;
 }
 

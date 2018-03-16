@@ -11,26 +11,29 @@ void Vermilion::BruteForceTracer::Render(std::vector<Vermilion::Camera*>& camera
 	std::mt19937 mtRanEngine(time(0));
 	std::uniform_real_distribution<float> distrib(0, 1);
 
-	float4 accum = float4(0, 0, 0, 0);
-	pixelValue newPixelCarrier;
+	const glm::vec3 lightDirection = glm::normalize(glm::vec3(-0.5f, 0.f, 0.5f));
+	//const float3 lightDirection_f3 = float3(-0.5f,1.f,0.5f);
 
 
 	for (auto cam : cameraList)
 	{
-		aiMaterial *hitMaterial;
-		glm::vec3 hitLocation;
-		float hitDistance;
-		glm::vec3 hitNormal;
+
 
 		#pragma omp parallel for
 		for (uint64_t p = 0; p < cam->RenderTargetSize; ++p)
 		{
+			aiMaterial *hitMaterial;
+			glm::vec3 hitLocation;
+			float hitDistance;
+			glm::vec3 hitNormal;
+			float4 accum = float4(0, 0, 0, 0);
+			pixelValue newPixelCarrier;
 			float fOffX = (((p % cam->uImageU) - (cam->uImageU / 2.f))/* + distrib(mtRanEngine) - 0.5*/) * 0.01;
 			float fOffY = (((p / cam->uImageU) - (cam->uImageV / 2.f))/* + distrib(mtRanEngine) - 0.5*/) * 0.01;
 
 			if(mEng->RayCast(cam->mPosition, glm::vec3(fOffX, -fOffY, -cam->mDistToFilm), &hitMaterial, &hitLocation, &hitNormal, &hitDistance))
 			{
-				float vNDL = glm::dot(glm::vec3(0,0,1), hitNormal);
+				float vNDL = glm::dot(lightDirection, glm::normalize(hitNormal));
 
 				// TEMP ASSIGN HERE
 				newPixelCarrier.light = vNDL;
@@ -39,6 +42,10 @@ void Vermilion::BruteForceTracer::Render(std::vector<Vermilion::Camera*>& camera
 				{
 					if (hitMaterial->mProperties[ma]->mSemantic == aiTextureType_DIFFUSE);
 				}
+
+				// Shadow
+				if(mEng->RayCast(hitLocation, lightDirection, nullptr, nullptr, nullptr, nullptr))
+					vNDL = 0.f;
 
 				accum = float4(
 					0.890196078f * vNDL,
@@ -49,9 +56,9 @@ void Vermilion::BruteForceTracer::Render(std::vector<Vermilion::Camera*>& camera
 			}
 			
 			newPixelCarrier.pixel = p;
-			newPixelCarrier.red = accum.x;
-			newPixelCarrier.green = accum.y;
-			newPixelCarrier.blue = accum.z;
+			newPixelCarrier.red = std::max(std::min(accum.x, 1.f), 0.f);
+			newPixelCarrier.green = std::max(std::min(accum.y, 1.f), 0.f);
+			newPixelCarrier.blue = std::max(std::min(accum.z, 1.f), 0.f);
 			newPixelCarrier.alpha = accum.w;
 			newPixelCarrier.depth = hitDistance;
 

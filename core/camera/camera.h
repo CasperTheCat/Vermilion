@@ -46,13 +46,13 @@ namespace Vermilion
 
 	struct pixelValue
 	{
-		uint64_t pixel; // 8
-		float red;
-		float green;	// 8
-		float blue;
-		float alpha;	// 8
-		float depth;
-		float light;	// 8
+	    uint64_t pixel; // 8
+            float red;
+	    float green;	// 8
+	    float blue;
+	    float alpha;	// 8
+	    float depth;
+            float light;	// 8
 	};
 
     class Camera
@@ -92,7 +92,6 @@ namespace Vermilion
         // Frame tileset for the rendergrid
         std::vector<frameTile> vTileSet;
 
-        MeshEngine *mMeshEngine;
 
         //Stats
         uint64_t uRaysFired;

@@ -86,8 +86,8 @@ void Vermilion::RenderEngine::draw()
         mLogEngine->logWarn("Renderer has no camera... Defaulting");
         // Default vars
         Vermilion::cameraSettings vcs;
-        vcs.imageResX = 250;
-        vcs.imageResY = 400;
+        vcs.imageResX = 1920;
+        vcs.imageResY = 1080;
         vcs.position = float3(0,90,500);
         vcs.rotation = float3(0,0,0);
         vcs.fBackDistance = 10.f;
@@ -108,7 +108,8 @@ void Vermilion::RenderEngine::draw()
 
 void Vermilion::RenderEngine::saveFrame(std::string name)
 {
-    //mCamera->saveFrame(name);
+    for(auto cam : mCameras)
+        cam->saveFrame(name);
 }
 
 
