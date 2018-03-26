@@ -18,107 +18,108 @@
 namespace Vermilion
 {
 
-	enum class vermRenderMode
-	{
-		RGB,
-		RGBA,
-		RGBAZ,
-		Depth,
-		Depth64,
+enum class vermRenderMode
+{
+	RGB,
+	RGBA,
+	RGBAZ,
+	Depth,
+	Depth64,
 
-		TOTAL_RENDER_MODES
-	};
+	TOTAL_RENDER_MODES
+};
 
-    struct cameraSettings
-    {
-        // used for camera settings
-		uint32_t imageResX;
-		uint32_t imageResY;
-        float3 position;
-        float3 rotation;
-        FLOAT fBackDistance;
-        FLOAT horAngleOfView;
-        uint32_t raysPerPixel;
-        uint32_t rayMaxBounces;
-		uint32_t tileSize;
-		vermRenderMode renderMode;
-    };
+struct cameraSettings
+{
+	// used for camera settings
+	uint32_t imageResX;
+	uint32_t imageResY;
+	float3 position;
+	float3 rotation;
+	FLOAT fBackDistance;
+	FLOAT fBackSizeX;
+	FLOAT fBackSizeY;
+	FLOAT horAngleOfView;
+	uint32_t raysPerPixel;
+	uint32_t rayMaxBounces;
+	uint32_t tileSize;
+	vermRenderMode renderMode;
+};
 
-	struct pixelValue
-	{
-	    uint64_t pixel; // 8
-            float red;
-	    float green;	// 8
-	    float blue;
-	    float alpha;	// 8
-	    float depth;
-            float light;	// 8
-	};
+struct pixelValue
+{
+	uint64_t pixel; // 8
+	float red;
+	float green; // 8
+	float blue;
+	float alpha; // 8
+	float depth;
+	float light; // 8
+};
 
-    class Camera
-    {
-        std::mutex write_mutex;        
+class Camera
+{
+	std::mutex write_mutex;
 
-	public:
-		// Image data
-		uint32_t uImageU;
-		uint32_t uImageV;
+  public:
+	// Image data
+	uint32_t uImageU;
+	uint32_t uImageV;
 
-		uint64_t RenderTargetSize;
-        // Used for final image post composite
-        float* mImage; 
+	uint64_t RenderTargetSize;
+	// Used for final image post composite
+	float *mImage;
 
-        // Camera needs a location
-        glm::vec3 mPosition;
+	// Camera needs a location
+	glm::vec3 mPosition;
 
-        // Camera also needs a rotation
-		glm::vec3 mRotation;
+	// Camera also needs a rotation
+	glm::vec3 mRotation;
 
-        // it also needs a distance to the pixel grid
-        FLOAT mDistToFilm;
+	// it also needs a distance to the pixel grid
+	FLOAT mDistToFilm;
 
-		// Theta
-		FLOAT fAngleOfView;
+	FLOAT sensorSizeX;
+	FLOAT sensorSizeY;
 
-		// Ray data
-		uint32_t uMaxBounces;
-		uint32_t uSamplesPerPixel;
+	// Theta
+	FLOAT fAngleOfView;
 
-		// Tiling size
-		uint32_t uBucketsU;
-		uint32_t uBucketsV;
-		uint32_t uTileSize;
-		
-        // Frame tileset for the rendergrid
-        std::vector<frameTile> vTileSet;
+	// Ray data
+	uint32_t uMaxBounces;
+	uint32_t uSamplesPerPixel;
 
+	// Tiling size
+	uint32_t uBucketsU;
+	uint32_t uBucketsV;
+	uint32_t uTileSize;
 
-        //Stats
-        uint64_t uRaysFired;
-        uint64_t uRaysHit;
+	// Frame tileset for the rendergrid
+	std::vector<frameTile> vTileSet;
 
-		vermRenderMode renderMode;
+	//Stats
+	uint64_t uRaysFired;
+	uint64_t uRaysHit;
 
-        /// Rays are spawned from camera origin and trace based on rotation
-        /// Default camera alignment is along X
-    private:
+	vermRenderMode renderMode;
+
+	/// Rays are spawned from camera origin and trace based on rotation
+	/// Default camera alignment is along X
+  private:
 	// Functions
 	void GenerateTileSet();
 	void RenderTile(frameTile &rTile);
-    bool rayShadowCast(glm::vec3 pos, glm::vec3 dir);
-    Vermilion::float4 rayCast(float3 start, float3 rotation, float ofx, float ofy, bool recursive);
+	bool rayShadowCast(glm::vec3 pos, glm::vec3 dir);
+	Vermilion::float4 rayCast(float3 start, float3 rotation, float ofx, float ofy, bool recursive);
 
-    public:
-        Camera(cameraSettings &_settings);
+  public:
+	Camera(cameraSettings &_settings);
 
-        ~Camera();
+	~Camera();
 
-		void setPixelValue(pixelValue &newPixelValue);
-		void saveFrame(std::string name);
-
-    };
-
+	void setPixelValue(pixelValue &newPixelValue);
+	void saveFrame(std::string name);
+};
 }
-
 
 #endif //VERMILION_CAMERA_H

@@ -190,26 +190,41 @@ namespace Vermilion {
 
         // Subtraction
         float4 operator-(float4 &rhs) const {
-            return float4(this->x + rhs.x,
+            return float4(this->x - rhs.x,
                           this->y - rhs.y,
                           this->z - rhs.z,
                           this->w - rhs.w);
         }
 
         // Mul
-        float4 operator*(float4 &rhs) const {
-            return float4(this->x + rhs.x,
+        float4 operator*(const float4 &rhs) const {
+            return float4(this->x * rhs.x,
                           this->y * rhs.y,
                           this->z * rhs.z,
                           this->w * rhs.w);
         }
 
+        float4 operator*(const float &rhs) const {
+            return float4(this->x * rhs,
+            this->y * rhs,
+            this->z * rhs,
+            this->w * rhs
+            );
+        }
+
         // Div
         float4 operator/(const float4 &rhs) const {
-            return float4(this->x + rhs.x,
+            return float4(this->x / rhs.x,
                           this->y / rhs.y,
                           this->z / rhs.z,
                           this->w / rhs.w);
+        }
+
+        float4 operator/(const uint32_t &rhs) const {
+            return float4(this->x / rhs,
+                          this->y / rhs,
+                          this->z / rhs,
+                          this->w / rhs);
         }
 
         // FAddition
@@ -231,7 +246,7 @@ namespace Vermilion {
         }
 
         // Subtraction
-        float4 &operator-=(float4 &rhs) {
+        float4 &operator-=(const float4 &rhs) {
             this->x -= rhs.x;
             this->y -= rhs.y;
             this->z -= rhs.z;
@@ -257,7 +272,7 @@ namespace Vermilion {
             return *this;
         }
 
-        float4 &operator/(const uint32_t &rhs) {
+        float4 &operator/=(const uint32_t &rhs) {
             this->x /= rhs;
             this->y /= rhs;
             this->z /= rhs;

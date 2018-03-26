@@ -86,13 +86,15 @@ void Vermilion::RenderEngine::draw()
         mLogEngine->logWarn("Renderer has no camera... Defaulting");
         // Default vars
         Vermilion::cameraSettings vcs;
-        vcs.imageResX = 1920;
-        vcs.imageResY = 1080;
-        vcs.position = float3(0,90,500);
+        vcs.imageResX = 864 / 4;
+        vcs.imageResY = 576 / 4;
+        vcs.position = float3(0,90,200);
         vcs.rotation = float3(0,0,0);
-        vcs.fBackDistance = 10.f;
+        vcs.fBackDistance = 3.f * 3;
         vcs.horAngleOfView = 90.f;
-        vcs.raysPerPixel = 5;
+        vcs.raysPerPixel = 64;
+        vcs.fBackSizeX = 3.6f;
+        vcs.fBackSizeY = 2.4f;
         vcs.rayMaxBounces = 5;
         vcs.tileSize = 16;
 		vcs.renderMode = vermRenderMode::RGBAZ;

@@ -9,8 +9,6 @@
 #include "camera.h"
 #include "../compat.h"
 
-
-
 // OIIO
 #include "OpenImageIO/imagebuf.h"
 
@@ -28,17 +26,15 @@ void Vermilion::Camera::GenerateTileSet()
 
 	vTileSet.reserve(tBuckets);
 
-
 	for (auto i = 0; i < uBucketsU; i++)
 		for (auto j = 0; j < uBucketsV; j++)
 			vTileSet.push_back(frameTile(uTileSize, uTileSize, uTileSize * i, uTileSize * j));
 }
 
-
-Vermilion::Camera::Camera(cameraSettings& _settings)
+Vermilion::Camera::Camera(cameraSettings &_settings)
 {
-    uRaysFired = 0;
-    uRaysHit = 0;
+	uRaysFired = 0;
+	uRaysHit = 0;
 	RenderTargetSize = _settings.imageResX * _settings.imageResY;
 	mDistToFilm = _settings.fBackDistance;
 	fAngleOfView = _settings.horAngleOfView;
@@ -51,10 +47,13 @@ Vermilion::Camera::Camera(cameraSettings& _settings)
 	uImageV = _settings.imageResY;
 	renderMode = _settings.renderMode;
 
-    //GenerateTileSet(); // Don't actually do this...
-    // Instead have an X by Y image and just render in buckets...
+	sensorSizeX = _settings.fBackSizeX;
+	sensorSizeY = _settings.fBackSizeY;
 
-	switch(renderMode)
+	//GenerateTileSet(); // Don't actually do this...
+	// Instead have an X by Y image and just render in buckets...
+
+	switch (renderMode)
 	{
 	case vermRenderMode::RGB:
 		mImage = new float[RenderTargetSize * 3];
@@ -82,31 +81,31 @@ Vermilion::Camera::~Camera()
 	delete mImage;
 }
 
-void Vermilion::Camera::setPixelValue(pixelValue& newPixelValue)
+void Vermilion::Camera::setPixelValue(pixelValue &newPixelValue)
 {
-    float * temp = nullptr;
-    switch(renderMode)
+	float *temp = nullptr;
+	switch (renderMode)
 	{
 	case vermRenderMode::RGB:
 		temp = mImage + newPixelValue.pixel * 3;
-                temp[0] = newPixelValue.red;
-                temp[1] = newPixelValue.green;
-                temp[2] = newPixelValue.blue;
+		temp[0] = newPixelValue.red;
+		temp[1] = newPixelValue.green;
+		temp[2] = newPixelValue.blue;
 		break;
 	case vermRenderMode::RGBA:
 		temp = mImage + newPixelValue.pixel * 4;
-                temp[0] = newPixelValue.red;
-                temp[1] = newPixelValue.green;
-                temp[2] = newPixelValue.blue;
-                temp[3] = newPixelValue.alpha;
+		temp[0] = newPixelValue.red;
+		temp[1] = newPixelValue.green;
+		temp[2] = newPixelValue.blue;
+		temp[3] = newPixelValue.alpha;
 		break;
 	case vermRenderMode::RGBAZ:
 		temp = mImage + newPixelValue.pixel * 5;
-                temp[0] = newPixelValue.red;
-                temp[1] = newPixelValue.green;
-                temp[2] = newPixelValue.blue;
-                temp[3] = newPixelValue.alpha;
-                temp[4] = newPixelValue.depth;
+		temp[0] = newPixelValue.red;
+		temp[1] = newPixelValue.green;
+		temp[2] = newPixelValue.blue;
+		temp[3] = newPixelValue.alpha;
+		temp[4] = newPixelValue.depth;
 		break;
 	case vermRenderMode::Depth:
 		mImage[newPixelValue.pixel] = newPixelValue.depth;
@@ -122,22 +121,22 @@ void Vermilion::Camera::setPixelValue(pixelValue& newPixelValue)
 
 void Vermilion::Camera::saveFrame(std::string name)
 {
-    auto outFrame = new unsigned char[uImageU * uImageV * 4];
-	float * outDepth = nullptr;
-	if(renderMode == vermRenderMode::RGBAZ)
+	auto outFrame = new unsigned char[uImageU * uImageV * 4];
+	float *outDepth = nullptr;
+	if (renderMode == vermRenderMode::RGBAZ)
 	{
 		outDepth = new float[uImageU * uImageV];
 	}
-	if(renderMode == vermRenderMode::Depth)
+	if (renderMode == vermRenderMode::Depth)
 	{
 		outDepth = mImage;
 	}
 
-    // Do 32f to 16u conversion
-    for( uint64_t p = 0; p < uImageU * uImageV; ++p)
-    {
-        // CLAMP
-        // SRGB transform
+	// Do 32f to 16u conversion
+	for (uint64_t p = 0; p < uImageU * uImageV; ++p)
+	{
+		// CLAMP
+		// SRGB transform
 		switch (renderMode)
 		{
 		case vermRenderMode::RGB:
@@ -169,25 +168,23 @@ void Vermilion::Camera::saveFrame(std::string name)
 		default:
 			throw std::exception();
 		}
+	}
 
-    }
-
-    //TODO FILE OUT
-    OpenImageIO::ImageSpec spec(uImageU, uImageV, 4);
-    auto outBuffer = OpenImageIO::ImageBuf(spec, (void*)outFrame);
-    outBuffer.write(name + ".png", "png");
+	//TODO FILE OUT
+	OpenImageIO::ImageSpec spec(uImageU, uImageV, 4);
+	auto outBuffer = OpenImageIO::ImageBuf(spec, (void *)outFrame);
+	outBuffer.write(name + ".png", "png");
 
 	std::cout << "FileWritten" << std::endl;
 
 	if (renderMode == vermRenderMode::Depth || renderMode == vermRenderMode::RGBAZ)
 	{
 		OpenImageIO::ImageSpec dImageSpec(uImageU, uImageV, 1, OpenImageIO::TypeDesc::FLOAT);
-		auto depthOutBuffer = OpenImageIO::ImageBuf(dImageSpec, (void*)outDepth);
+		auto depthOutBuffer = OpenImageIO::ImageBuf(dImageSpec, (void *)outDepth);
 		depthOutBuffer.write(name + "_depth.exr", ".exr");
 	}
 
-    delete[] outFrame;
+	delete[] outFrame;
 	if (renderMode != vermRenderMode::Depth)
 		delete[] mImage;
 }
-
