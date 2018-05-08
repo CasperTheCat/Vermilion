@@ -21,7 +21,7 @@ void Vermilion::BruteForceTracer::Render(std::vector<Vermilion::Camera*>& camera
 
 		std::mt19937 mtRanEngine(time(0));
 
-		#pragma omp parallel for
+		#pragma omp parallel for schedule(dynamic, 1)
 		for (uint64_t p = 0; p < cam->RenderTargetSize; ++p)
 		{
 			std::uniform_real_distribution<float> distrib(0, 0.5);
