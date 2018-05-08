@@ -78,7 +78,7 @@ Vermilion::Camera::Camera(cameraSettings &_settings)
 
 Vermilion::Camera::~Camera()
 {
-	delete mImage;
+	delete[] mImage;
 }
 
 void Vermilion::Camera::setPixelValue(pixelValue &newPixelValue)
@@ -185,6 +185,6 @@ void Vermilion::Camera::saveFrame(std::string name)
 	}
 
 	delete[] outFrame;
-	if (renderMode != vermRenderMode::Depth)
-		delete[] mImage;
+	if (renderMode == vermRenderMode::RGBAZ)
+		delete[] outDepth;
 }
