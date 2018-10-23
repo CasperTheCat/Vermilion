@@ -10,8 +10,10 @@ namespace Vermilion {
 // Floating point type.
 #ifndef USEDOUBLEPREC
     typedef float FLOAT;
+    #define EPSILON 1e-14
 #else
     typedef double FLOAT;
+    #define EPSILON 1e-28
 #endif
 
 // This file contains the code for any engine types

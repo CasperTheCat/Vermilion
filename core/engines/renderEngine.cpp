@@ -13,6 +13,7 @@ Vermilion::RenderEngine::RenderEngine() :
     // The lack of a mesh engine is problem here but we can make a logger
     // Logger needs override change settings
     this->mLogEngine = new LogEngine("Renderer.log", VermiLogBoth, VermiLogLevelAll);
+    this->Initialise();
 }
 
 Vermilion::RenderEngine::RenderEngine(MeshEngine *mEng) :
@@ -24,6 +25,7 @@ Vermilion::RenderEngine::RenderEngine(MeshEngine *mEng) :
 {
     // Same as above, creats a log engine
     this->mLogEngine = new LogEngine("Renderer.log", VermiLogBoth, VermiLogLevelAll);
+    this->Initialise();
 }
 
 Vermilion::RenderEngine::RenderEngine(LogEngine *lEng) :
@@ -32,6 +34,7 @@ Vermilion::RenderEngine::RenderEngine(LogEngine *lEng) :
         mLogEngine(lEng),
         bHasInternalLogEng(false)
 {
+    this->Initialise();
 }
 
 Vermilion::RenderEngine::RenderEngine(MeshEngine *mEng, LogEngine *lEng) :
@@ -40,6 +43,12 @@ Vermilion::RenderEngine::RenderEngine(MeshEngine *mEng, LogEngine *lEng) :
     mMeshEngine(mEng),
     mLogEngine(lEng)
 {
+    this->Initialise();
+}
+
+void Vermilion::RenderEngine::Initialise()
+{
+    mIntegrator = new BruteForceTracer();
 }
 
 Vermilion::RenderEngine::~RenderEngine()
@@ -48,6 +57,16 @@ Vermilion::RenderEngine::~RenderEngine()
     if (bHasInternalLogEng) delete mLogEngine;
 	for (uint32_t i = 0; i < mCameras.size(); ++i)
 		if (mCameras[i]) delete mCameras[i];
+}
+
+void Vermilion::RenderEngine::assignIntegrator(Integrator *externalIntegrator)
+{
+    if (bHasInternalIntegrator)
+    {
+        delete mIntegrator;
+        bHasInternalIntegrator = false;
+    }
+    mIntegrator = externalIntegrator;
 }
 
 void Vermilion::RenderEngine::assignEngine(LogEngine *lEng)
@@ -75,21 +94,16 @@ void Vermilion::RenderEngine::draw()
         return;
     }
 
-    if(!mIntegrator)
-    {
-        mIntegrator = new BruteForceTracer();
-    }
-    mIntegrator = new BruteForceTracer();
-
     // Do we have a camera?
     if(mCameras.empty())
     {
         mLogEngine->logWarn("Renderer has no camera... Defaulting");
         // Default vars
         Vermilion::cameraSettings vcs;
-        vcs.imageResX = 864 / 4;
-        vcs.imageResY = 576 / 4;
-        vcs.position = float3(0,90,200);
+        vcs.imageResX = 2592;
+        vcs.imageResY = 1728;
+        //vcs.position = float3(0,0,200);
+        vcs.position = float3(0,80,800);
         vcs.rotation = float3(0,0,0);
         vcs.fBackDistance = 3.f * 3;
         vcs.horAngleOfView = 90.f;

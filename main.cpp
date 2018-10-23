@@ -30,7 +30,9 @@ int main(int argc, char **argv)
     // We will needs to args check TBH
     // Renderer time
     auto mEng = new MeshEngine();
+    auto integrator = new PathTracer();
     auto rEng = new RenderEngine(mEng);
+    rEng->assignIntegrator(integrator);
 
     mEng->load(fName); // Get model data
     if(mEng->bindTexture(normalName))

@@ -24,11 +24,15 @@ namespace Vermilion
 
 		// Actual Code used to render
 		Integrator *mIntegrator;
+        bool bHasInternalIntegrator;
 
         // Logging engine to log directly from here
         LogEngine* mLogEngine;
         bool bHasInternalLogEng;
 
+
+    private:
+        void Initialise();
 
     public:
         RenderEngine();
@@ -44,6 +48,7 @@ namespace Vermilion
         // Engine Assignment
         void assignEngine(MeshEngine *mEng);
         void assignEngine(LogEngine *lEng);
+        void assignIntegrator(Integrator *externalIntegrator);
     };
 }
 

@@ -37,6 +37,7 @@ set(SOURCE_FILES main.cpp
         core/camera/camera.cpp
         core/camera/camera.h
         core/integrators/integrators.cpp
+        core/integrators/pathtracer.cpp
         core/integrators/integrators.h
         )
 

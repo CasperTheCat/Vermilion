@@ -99,7 +99,7 @@ namespace Vermilion
 	    bool load(std::string& fName);
 	    bool load(std::string& fName, int flags);
 		bool bindTexture(std::string& fName);
-	    bool RayCast(const glm::vec3& rayStart, const glm::vec3& rayDirection, aiMaterial **ppImpactMaterial, glm::vec3 *pHitLocation, glm::vec3 *pHitNormal, float *pHitDistance, glm::vec2 *pHitTexCoord);
+	    bool RayCast(const glm::vec3& rayStart, const glm::vec3& rayDirection, aiMaterial **ppImpactMaterial, glm::vec3 *pHitLocation, glm::vec3 *pHitNormal, float *pHitDistance, glm::vec2 *pHitTexCoord, glm::vec3 *pHitColour);
 		bool RayCastCollision(const glm::vec3& rayStart, const glm::vec3& rayDirection);
     };
 }

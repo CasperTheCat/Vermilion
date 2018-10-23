@@ -20,8 +20,9 @@ namespace Vermilion
 		virtual void Render(std::vector<Vermilion::Camera*>& cameraList, MeshEngine* mEng) override;
 	};
 
-    class PathTracer : public Integrator {
-
+    class PathTracer : public Integrator
+    {
+        virtual void Render(std::vector<Vermilion::Camera*>& cameraList, MeshEngine* mEng) override;
     };
 
     class BiDirectionPathTracer : public Integrator {

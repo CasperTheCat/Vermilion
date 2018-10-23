@@ -19,8 +19,10 @@ Vermilion::VermiTexture::VermiTexture
 
 void Vermilion::VermiTexture::Sample(const glm::vec2& TexCoord, glm::vec4 *pSample)
 {
-	auto mappedX = (uint32_t)round(TexCoord.x * (nWidth - 1));
-	auto mappedY = (uint32_t)round(TexCoord.y * (nHeight - 1));
+	auto safeTexCoordX = TexCoord.x - floor(TexCoord.x);
+	auto safeTexCoordY = TexCoord.y - floor(TexCoord.y);
+	auto mappedX = (uint32_t)round(safeTexCoordX * (nWidth - 1));
+	auto mappedY = (uint32_t)round(safeTexCoordY * (nHeight - 1));
 
 	auto ptr = &pData[(mappedY * nWidth + mappedX) * nChannels];
 
@@ -168,6 +170,20 @@ inline float triangleIntersect(const glm::vec3 &pos, const glm::vec3 &rot, const
 	return dot(e2, qvec) * inv_det;
 }
 
+inline float sphereIntersect(const glm::vec3 &pos, const glm::vec3 &rot, const glm::vec3 &p, const float rad)
+{
+		glm::vec3 op = p - pos; // Solve t^2*d.d + 2*t*(o-p).d + (o-p).(o-p)-R^2 = 0
+        double t;
+		double eps = 1e-4;
+		double b = glm::dot(op, rot);
+		double det = b * b - glm::dot(op, op) + rad * rad;
+        if (det < 0)
+            return 0;
+        else
+            det = sqrt(det);
+        return (t = b - det) > eps ? t : ((t = b + det) > eps ? t : 0);
+}
+
 bool Vermilion::MeshEngine::RayCastCollision(const glm::vec3& rayStart, const glm::vec3& rayDirection)
 {
 	glm::vec3 v0;
@@ -200,9 +216,22 @@ bool Vermilion::MeshEngine::RayCastCollision(const glm::vec3& rayStart, const gl
 }
 
 bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& rayDirection,
-	aiMaterial** ppImpactMaterial, glm::vec3 *pHitLocation, glm::vec3 *pHitNormal, float *pHitDistance, glm::vec2 *pHitTexCoord)
+	aiMaterial** ppImpactMaterial, glm::vec3 *pHitLocation, glm::vec3 *pHitNormal, float *pHitDistance, glm::vec2 *pHitTexCoord, glm::vec3 *pHitColour)
 {
 	// Doesn't use BVH.
+
+	if(pHitTexCoord)
+		*pHitTexCoord = glm::vec3(0,0,0);
+	if(pHitNormal)
+		*pHitNormal = glm::vec3(0,0,0);
+	if(pHitColour) 
+		*pHitColour = glm::vec3(0,0,0);
+	if(ppImpactMaterial)
+		*ppImpactMaterial = nullptr;
+	if(pHitLocation)
+		*pHitLocation = glm::vec3(0,0,0);
+	if(pHitDistance)
+		*pHitDistance = 0.f;
 
 	auto temp = 0;
 	glm::vec3 v0;
@@ -233,8 +262,8 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 			v0n.x = mesh->mNormals[temp].x;
 			v0n.y = mesh->mNormals[temp].y;
 			v0n.z = mesh->mNormals[temp].z;
-//			v0uv.x = mesh->mTextureCoords[0][temp].x;
-//			v0uv.y = mesh->mTextureCoords[0][temp].y;
+			v0uv.x = mesh->mTextureCoords[0][temp].x;
+			v0uv.y = mesh->mTextureCoords[0][temp].y;
 
 			// Get Second Face Indices
 			temp = mesh->mFaces[i].mIndices[1];
@@ -244,8 +273,8 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 			v1n.x = mesh->mNormals[temp].x;
 			v1n.y = mesh->mNormals[temp].y;
 			v1n.z = mesh->mNormals[temp].z;
-//			v1uv.x = mesh->mTextureCoords[0][temp].x;
-//			v1uv.y = mesh->mTextureCoords[0][temp].y;
+			v1uv.x = mesh->mTextureCoords[0][temp].x;
+			v1uv.y = mesh->mTextureCoords[0][temp].y;
 
 			// Get Third Face Indices
 			temp = mesh->mFaces[i].mIndices[2];
@@ -255,8 +284,8 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 			v2n.x = mesh->mNormals[temp].x;
 			v2n.y = mesh->mNormals[temp].y;
 			v2n.z = mesh->mNormals[temp].z;
-//			v2uv.x = mesh->mTextureCoords[0][temp].x;
-//			v2uv.y = mesh->mTextureCoords[0][temp].y;
+			v2uv.x = mesh->mTextureCoords[0][temp].x;
+			v2uv.y = mesh->mTextureCoords[0][temp].y;
 			
 			glm::vec3 vU = v1 - v0;
 			glm::vec3 vV = v2 - v0;
@@ -264,11 +293,11 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 			vNorm.y = (vU.z * vV.x) - (vU.x * vV.z);
 			vNorm.z = (vU.x * vV.y) - (vU.y * vV.x);
 
-			if (glm::dot(rayDirection, vNorm) > 0.f)
-				continue;
+			/*if (glm::dot(rayDirection, vNorm) > 0.f)
+				continue;*/
 			
 			testHit = triangleIntersect(rayStart, rayDirection, v0, v1, v2);
-			if (testHit > 0.01f && testHit < nearestHit) // EpsilonCheck
+			if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 			{
 				nearestHit = testHit;
 				// Interpolate Normals
@@ -295,6 +324,25 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 		}
 	}
 
+	// HardCoded Light Test
+	//testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(50, 110, 200), 15.f);
+	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(25, 110, 0), 4.f);
+	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+	{
+		nearestHit = testHit;
+		// Sphere is closest, it's a light!
+		if(pHitColour) 
+			*pHitColour = glm::vec3(1.0,1.5,1.5);
+	}
+
+	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(500, 500, 500), 15.f);
+	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+	{
+		nearestHit = testHit;
+		// Sphere is closest, it's a light!
+		if(pHitColour) 
+			*pHitColour = glm::vec3(2.0,1.0,1.0);
+	}
 
 	// Setup returns
 	if(ppImpactMaterial)

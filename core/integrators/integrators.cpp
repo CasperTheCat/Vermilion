@@ -63,7 +63,7 @@ void Vermilion::BruteForceTracer::Render(std::vector<Vermilion::Camera*>& camera
 				float cameraBackXCm = homogenousX * cam->sensorSizeX * 0.5;
 				float cameraBackYCm = homogenousY * cam->sensorSizeY * 0.5;
 
-				if(mEng->RayCast(cam->mPosition, glm::vec3(cameraBackXCm, -cameraBackYCm, -cam->mDistToFilm), &hitMaterial, &hitLocation, &hitNormal, &hitDistance, &hitUV))
+				if(mEng->RayCast(cam->mPosition, glm::vec3(cameraBackXCm, -cameraBackYCm, -cam->mDistToFilm), &hitMaterial, &hitLocation, &hitNormal, &hitDistance, &hitUV, nullptr))
 				{
 					glm::vec3 lightDirectionVector = lightLocation - hitLocation;
 					glm::vec3 lightDirection = glm::normalize(lightDirectionVector);
