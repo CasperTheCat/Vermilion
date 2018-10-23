@@ -68,9 +68,9 @@ Vermilion::Camera::Camera(cameraSettings &_settings)
 		mImage = new float[RenderTargetSize];
 		break;
 	case vermRenderMode::Depth64:
-		CXX17_FALLTHROUGH
+		CXX17_FALLTHROUGH;
 	case vermRenderMode::TOTAL_RENDER_MODES:
-		CXX17_FALLTHROUGH
+		CXX17_FALLTHROUGH;
 	default:
 		throw std::exception();
 	}
@@ -78,7 +78,7 @@ Vermilion::Camera::Camera(cameraSettings &_settings)
 
 Vermilion::Camera::~Camera()
 {
-	delete mImage;
+	delete[] mImage;
 }
 
 void Vermilion::Camera::setPixelValue(pixelValue &newPixelValue)
@@ -111,9 +111,9 @@ void Vermilion::Camera::setPixelValue(pixelValue &newPixelValue)
 		mImage[newPixelValue.pixel] = newPixelValue.depth;
 		break;
 	case vermRenderMode::Depth64:
-		CXX17_FALLTHROUGH
+		CXX17_FALLTHROUGH;
 	case vermRenderMode::TOTAL_RENDER_MODES:
-		CXX17_FALLTHROUGH
+		CXX17_FALLTHROUGH;
 	default:
 		throw std::exception();
 	}
@@ -162,9 +162,9 @@ void Vermilion::Camera::saveFrame(std::string name)
 			p = RenderTargetSize; // force exit
 			break;
 		case vermRenderMode::Depth64:
-			CXX17_FALLTHROUGH
+			CXX17_FALLTHROUGH;
 		case vermRenderMode::TOTAL_RENDER_MODES:
-			CXX17_FALLTHROUGH
+			CXX17_FALLTHROUGH;
 		default:
 			throw std::exception();
 		}

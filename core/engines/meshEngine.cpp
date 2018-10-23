@@ -101,7 +101,7 @@ bool Vermilion::MeshEngine::load(std::string& fName)
 		//aiProcess_LimitBoneWeights |
 		//aiProcess_RemoveRedundantMaterials |
 		//aiProcess_SplitLargeMeshes |
-		//aiProcess_GenUVCoords |
+//		aiProcess_GenUVCoords |
 		//aiProcess_SortByPType |
 		//aiProcess_FindDegenerates |
 		//aiProcess_FindInvalidData |
@@ -233,8 +233,8 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 			v0n.x = mesh->mNormals[temp].x;
 			v0n.y = mesh->mNormals[temp].y;
 			v0n.z = mesh->mNormals[temp].z;
-			v0uv.x = mesh->mTextureCoords[0][temp].x;
-			v0uv.y = mesh->mTextureCoords[0][temp].y;
+//			v0uv.x = mesh->mTextureCoords[0][temp].x;
+//			v0uv.y = mesh->mTextureCoords[0][temp].y;
 
 			// Get Second Face Indices
 			temp = mesh->mFaces[i].mIndices[1];
@@ -244,8 +244,8 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 			v1n.x = mesh->mNormals[temp].x;
 			v1n.y = mesh->mNormals[temp].y;
 			v1n.z = mesh->mNormals[temp].z;
-			v1uv.x = mesh->mTextureCoords[0][temp].x;
-			v1uv.y = mesh->mTextureCoords[0][temp].y;
+//			v1uv.x = mesh->mTextureCoords[0][temp].x;
+//			v1uv.y = mesh->mTextureCoords[0][temp].y;
 
 			// Get Third Face Indices
 			temp = mesh->mFaces[i].mIndices[2];
@@ -255,8 +255,8 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 			v2n.x = mesh->mNormals[temp].x;
 			v2n.y = mesh->mNormals[temp].y;
 			v2n.z = mesh->mNormals[temp].z;
-			v2uv.x = mesh->mTextureCoords[0][temp].x;
-			v2uv.y = mesh->mTextureCoords[0][temp].y;
+//			v2uv.x = mesh->mTextureCoords[0][temp].x;
+//			v2uv.y = mesh->mTextureCoords[0][temp].y;
 			
 			glm::vec3 vU = v1 - v0;
 			glm::vec3 vV = v2 - v0;

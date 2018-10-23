@@ -75,10 +75,11 @@ void Vermilion::RenderEngine::draw()
         return;
     }
 
-	if(!mIntegrator)
-	{
-		mIntegrator = new BruteForceTracer();
-	}
+    if(!mIntegrator)
+    {
+        mIntegrator = new BruteForceTracer();
+    }
+    mIntegrator = new BruteForceTracer();
 
     // Do we have a camera?
     if(mCameras.empty())
@@ -104,7 +105,9 @@ void Vermilion::RenderEngine::draw()
 
     // This probably needs the scene to do the raycasts :P
     //mCamera->renderFrame();
-	mIntegrator->Render(mCameras, mMeshEngine);
+
+    if(mIntegrator)
+        mIntegrator->Render(mCameras, mMeshEngine);
 
 }
 
