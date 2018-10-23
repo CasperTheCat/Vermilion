@@ -185,6 +185,6 @@ void Vermilion::Camera::saveFrame(std::string name)
 	}
 
 	delete[] outFrame;
-	if (renderMode != vermRenderMode::Depth)
-		delete[] mImage;
+	if (renderMode == vermRenderMode::RGBAZ)
+		delete[] outDepth;
 }
