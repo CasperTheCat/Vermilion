@@ -246,7 +246,7 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 
 	FLOAT nearestHit = INFINITY;
 	FLOAT testHit = 0.f;
-	uint32_t hitMeshIndex = 0;
+	int32_t hitMeshIndex = -1;
 	glm::vec3 vNorm;
 
 	for (uint32_t x = 0; x < sceneMeshes.size(); ++x)
@@ -326,13 +326,13 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 
 	// HardCoded Light Test
 	//testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(50, 110, 200), 15.f);
-	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(25, 110, 0), 4.f);
+	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(25, 110, -50), 4.f);
 	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 	{
 		nearestHit = testHit;
 		// Sphere is closest, it's a light!
 		if(pHitColour) 
-			*pHitColour = glm::vec3(1.0,1.5,1.5);
+			*pHitColour = glm::vec3(1.0,1.5,1.5) * 1.f;
 	}
 
 	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(500, 500, 500), 15.f);
@@ -341,11 +341,74 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 		nearestHit = testHit;
 		// Sphere is closest, it's a light!
 		if(pHitColour) 
-			*pHitColour = glm::vec3(2.0,1.0,1.0);
+			*pHitColour = glm::vec3(1.0,1.0,1.0) * 10.f;
 	}
 
+	/*testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(500, 500, 1700), 300.f);
+	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+	{
+		nearestHit = testHit;
+		// Sphere is closest, it's a light!
+		if(pHitColour) 
+			*pHitColour = glm::vec3(0.0,1.0,1.0) * 40.f;
+	}*/
+
+	{
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,-1e5,0), 1e5);
+		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+		{
+			nearestHit = testHit;
+			if(pHitNormal)
+				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0,-1e5,0));
+		}
+
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,1e5 + 1000,0), 1e5);
+		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+		{
+			nearestHit = testHit;
+			if(pHitNormal)
+				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0,1e5 + 1000,0));
+
+		}
+
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(-1e5 - 2000,0,0), 1e5);
+		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+		{
+			nearestHit = testHit;
+			if(pHitNormal)
+				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(-1e5 - 2000,0,0));
+
+		}
+
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(1e5 + 2000, 0,0), 1e5);
+		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+		{
+			nearestHit = testHit;
+			if(pHitNormal)
+				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(1e5 + 2000, 0,0));
+
+		}
+
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0, 0, -1e5 - 2000), 1e5);
+		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+		{
+			nearestHit = testHit;
+			if(pHitNormal)
+				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0, 0, -1e5 - 2000));
+
+		}
+
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0, 0, 1e5 + 2000), 1e5);
+		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+		{
+			nearestHit = testHit;
+			if(pHitNormal)
+				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0, 0, 1e5 + 2000));
+
+		}
+	}
 	// Setup returns
-	if(ppImpactMaterial)
+	if(ppImpactMaterial && hitMeshIndex >= 0)
 		*ppImpactMaterial = pScene->mMaterials[hitMeshIndex];
 	if(pHitLocation)
 		*pHitLocation = rayStart + (rayDirection * nearestHit);

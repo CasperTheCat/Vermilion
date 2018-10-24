@@ -40,7 +40,11 @@ Vermilion::Camera::Camera(cameraSettings &_settings)
 	fAngleOfView = _settings.horAngleOfView;
 	uMaxBounces = _settings.rayMaxBounces;
 	mPosition = glm::vec3(_settings.position.x, _settings.position.y, _settings.position.z);
-	mRotation = glm::vec3(_settings.rotation.x, _settings.rotation.y, _settings.rotation.z);
+	mRotation = glm::vec3(
+		-_settings.rotation.x * 3.1415926535 / 180,
+		-_settings.rotation.y * 3.1415926535 / 180,
+		_settings.rotation.z * 3.1415926535 / 180
+		);
 	uSamplesPerPixel = _settings.raysPerPixel;
 	uTileSize = _settings.tileSize;
 	uImageU = _settings.imageResX;

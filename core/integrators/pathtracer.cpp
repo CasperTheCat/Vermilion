@@ -4,6 +4,9 @@
 
 #include "integrators.h"
 #include <random>
+#include "../../extern/glm/glm/gtx/euler_angles.hpp"
+#include "../../extern/glm/glm/gtx/string_cast.hpp"
+#include "../../extern/glm/glm/gtc/matrix_transform.hpp"
 
 glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir, std::mt19937 mtRanEngine)
 {
@@ -36,7 +39,7 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 
 		// Tex Lookup
 		glm::vec4 sampleColour = glm::vec4();
-		if (mEng->boundTextures.size() > 0)
+		if (hitMaterial && mEng->boundTextures.size() > 0)
 		{
 			mEng->boundTextures[0].Sample(hitUV, &sampleColour);		
 		}
@@ -92,6 +95,18 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 	{
 		std::mt19937 mtRanEngine(time(0));
 
+		// Rotate the camera
+		//glm::mat4 cameraTransform = glm::eulerAngleYXZ(cam->mRotation.y, cam->mRotation.x, cam->mRotation.z);
+		glm::mat4 cameraTransform(1);
+
+		// Rotations
+		cameraTransform = glm::rotate(cameraTransform, cam->mRotation.y, glm::vec3(0,1,0));
+		cameraTransform = glm::rotate(cameraTransform, cam->mRotation.x, glm::vec3(1,0,0));
+		cameraTransform = glm::rotate(cameraTransform, cam->mRotation.z, glm::vec3(0,0,1));
+
+		printf("%s\n", glm::to_string(cameraTransform).c_str());
+		
+
 		#pragma omp parallel for schedule(dynamic, 1)
 		for (uint64_t p = 0; p < cam->RenderTargetSize; ++p)
 		{
@@ -133,8 +148,13 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 						//float fOffX = (((p % cam->uImageU) - (cam->uImageU / 2.f))/* + distrib(mtRanEngine) - 0.5*/) * cam->sensorSizeX;
 						//float fOffY = (((p / cam->uImageU) - (cam->uImageV / 2.f))/* + distrib(mtRanEngine) - 0.5*/) * 0.01;
 	
-						auto gridPane = glm::vec3(cameraBackXCm, -cameraBackYCm, -cam->mDistToFilm); // Flip from VK to GL space
-						accum += Radiance(mEng, cam->mPosition, glm::normalize(gridPane), mtRanEngine);// * 0.01f;
+						auto gridPane = glm::vec4(cameraBackXCm, -cameraBackYCm, -cam->mDistToFilm, 1.0f); // Flip from VK to GL space
+						//printf("GRIDPANE: %s\n", glm::to_string(gridPane).c_str());		
+						//printf("GRIDPANE: %s\n", glm::to_string(glm::normalize(gridPane)).c_str());			
+						auto rayDirection = cameraTransform * gridPane;
+						//printf("%s\n", glm::to_string(rayDirection).c_str());
+						//printf("%s\n", glm::to_string(glm::normalize(rayDirection)).c_str());
+						accum += Radiance(mEng, cam->mPosition, glm::normalize(glm::vec3(rayDirection) / rayDirection.w),  mtRanEngine);// * 0.01f;
 					}
 				}
 			}
