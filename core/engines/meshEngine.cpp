@@ -1,6 +1,7 @@
 ////// Vermilion Mesh Engine
 
 #include "meshEngine.h"
+#include "../accelerators/triangle.h"
 #include "OpenImageIO/imagebuf.h"
 
 Vermilion::VermiTexture::VermiTexture
@@ -98,8 +99,8 @@ bool Vermilion::MeshEngine::load(std::string& fName)
 		aiProcess_Triangulate |
 		aiProcess_FlipUVs |
 		aiProcess_GenSmoothNormals |
-		aiProcess_JoinIdenticalVertices |
-		aiProcess_ImproveCacheLocality |
+		//aiProcess_JoinIdenticalVertices |
+		//aiProcess_ImproveCacheLocality |
 		//aiProcess_LimitBoneWeights |
 		//aiProcess_RemoveRedundantMaterials |
 		//aiProcess_SplitLargeMeshes |
@@ -249,9 +250,10 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 	int32_t hitMeshIndex = -1;
 	glm::vec3 vNorm;
 
-	for (uint32_t x = 0; x < sceneMeshes.size(); ++x)
+	/*for (uint32_t x = 0; x < sceneMeshes.size(); ++x)
 	{
 		aiMesh *mesh = sceneMeshes[x];
+		
 		for (uint32_t i = 0; i < mesh->mNumFaces; ++i)
 		{
 			// Get First Face Indices
@@ -262,8 +264,11 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 			v0n.x = mesh->mNormals[temp].x;
 			v0n.y = mesh->mNormals[temp].y;
 			v0n.z = mesh->mNormals[temp].z;
-			v0uv.x = mesh->mTextureCoords[0][temp].x;
-			v0uv.y = mesh->mTextureCoords[0][temp].y;
+			if(mesh->HasTextureCoords(0))
+			{
+				v0uv.x = mesh->mTextureCoords[0][temp].x;
+				v0uv.y = mesh->mTextureCoords[0][temp].y;
+			}
 
 			// Get Second Face Indices
 			temp = mesh->mFaces[i].mIndices[1];
@@ -273,8 +278,11 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 			v1n.x = mesh->mNormals[temp].x;
 			v1n.y = mesh->mNormals[temp].y;
 			v1n.z = mesh->mNormals[temp].z;
-			v1uv.x = mesh->mTextureCoords[0][temp].x;
-			v1uv.y = mesh->mTextureCoords[0][temp].y;
+			if(mesh->HasTextureCoords(0))
+			{
+				v1uv.x = mesh->mTextureCoords[0][temp].x;
+				v1uv.y = mesh->mTextureCoords[0][temp].y;
+			}
 
 			// Get Third Face Indices
 			temp = mesh->mFaces[i].mIndices[2];
@@ -284,8 +292,11 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 			v2n.x = mesh->mNormals[temp].x;
 			v2n.y = mesh->mNormals[temp].y;
 			v2n.z = mesh->mNormals[temp].z;
-			v2uv.x = mesh->mTextureCoords[0][temp].x;
-			v2uv.y = mesh->mTextureCoords[0][temp].y;
+			if(mesh->HasTextureCoords(0))
+			{
+				v2uv.x = mesh->mTextureCoords[0][temp].x;
+				v2uv.y = mesh->mTextureCoords[0][temp].y;
+			}
 			
 			glm::vec3 vU = v1 - v0;
 			glm::vec3 vV = v2 - v0;
@@ -293,8 +304,8 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 			vNorm.y = (vU.z * vV.x) - (vU.x * vV.z);
 			vNorm.z = (vU.x * vV.y) - (vU.y * vV.x);
 
-			/*if (glm::dot(rayDirection, vNorm) > 0.f)
-				continue;*/
+			if (glm::dot(rayDirection, vNorm) > 0.f)
+				continue;
 			
 			testHit = triangleIntersect(rayStart, rayDirection, v0, v1, v2);
 			if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
@@ -322,88 +333,110 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 				//break;
 			}
 		}
+	}*/
+
+	Ray r(rayStart,rayDirection);
+	IntersectionInfo ii{};
+
+	if(sceneAccelerator->getIntersection(r, &ii, false))
+	{
+		//printf("%f\n", ii.t);
+		nearestHit = ii.t;
+		if(pHitNormal)
+			*pHitNormal = ii.object->getNormal(ii, pHitTexCoord);
+		hitMeshIndex = 0;//mesh->mMaterialIndex;
+
 	}
+	
 
 	// HardCoded Light Test
 	//testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(50, 110, 200), 15.f);
-	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(25, 110, -50), 4.f);
+	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(-55, 350,-50), 4.f);
 	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 	{
 		nearestHit = testHit;
 		// Sphere is closest, it's a light!
 		if(pHitColour) 
-			*pHitColour = glm::vec3(1.0,1.5,1.5) * 1.f;
+			*pHitColour = glm::vec3(1.0,1.5,1.5) * 2.f;
 	}
 
-	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(500, 500, 500), 15.f);
+	/*testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(500, 500, 500), 15.f);
 	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 	{
 		nearestHit = testHit;
 		// Sphere is closest, it's a light!
 		if(pHitColour) 
-			*pHitColour = glm::vec3(1.0,1.0,1.0) * 10.f;
-	}
-
-	/*testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(500, 500, 1700), 300.f);
-	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
-	{
-		nearestHit = testHit;
-		// Sphere is closest, it's a light!
-		if(pHitColour) 
-			*pHitColour = glm::vec3(0.0,1.0,1.0) * 40.f;
+			*pHitColour = glm::vec3(1.0,1.0,1.0) * 1.f;
 	}*/
 
+	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(500, 800, 1300), 300.f);
+	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 	{
-		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,-1e5,0), 1e5);
+		nearestHit = testHit;
+		// Sphere is closest, it's a light!
+		if(pHitColour) 
+			*pHitColour = glm::vec3(1.0,1.0,1.0) * 4.f;
+	}
+
+
+
+	{
+		auto sizeOfSpheres = 1e7;
+		// TopBottom
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,-sizeOfSpheres + 1000,0), sizeOfSpheres);
 		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 		{
 			nearestHit = testHit;
 			if(pHitNormal)
-				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0,-1e5,0));
+				*pHitNormal = -glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0,-sizeOfSpheres + 1000,0));
 		}
 
-		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,1e5 + 1000,0), 1e5);
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,sizeOfSpheres - 0,0), sizeOfSpheres);
 		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 		{
 			nearestHit = testHit;
 			if(pHitNormal)
-				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0,1e5 + 1000,0));
-
-		}
-
-		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(-1e5 - 2000,0,0), 1e5);
-		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
-		{
-			nearestHit = testHit;
-			if(pHitNormal)
-				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(-1e5 - 2000,0,0));
-
-		}
-
-		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(1e5 + 2000, 0,0), 1e5);
-		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
-		{
-			nearestHit = testHit;
-			if(pHitNormal)
-				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(1e5 + 2000, 0,0));
+				*pHitNormal = -glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0,sizeOfSpheres - 0,0));
 
 		}
 
-		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0, 0, -1e5 - 2000), 1e5);
+
+		// LeftRight
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(-sizeOfSpheres + 2000,0,0), sizeOfSpheres);
 		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 		{
 			nearestHit = testHit;
 			if(pHitNormal)
-				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0, 0, -1e5 - 2000));
+				*pHitNormal = -glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(-sizeOfSpheres + 2000,0,0));
 
 		}
 
-		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0, 0, 1e5 + 2000), 1e5);
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(sizeOfSpheres - 2000, 0,0), sizeOfSpheres);
 		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 		{
 			nearestHit = testHit;
 			if(pHitNormal)
-				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0, 0, 1e5 + 2000));
+				*pHitNormal = -glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(sizeOfSpheres - 2000, 0,0));
+
+		}
+
+
+		// back
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0, 0, -sizeOfSpheres + 2000), sizeOfSpheres);
+		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+		{
+			nearestHit = testHit;
+			if(pHitNormal)
+				*pHitNormal = -glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0, 0, -sizeOfSpheres + sizeOfSpheres));
+
+		}
+
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0, 0, sizeOfSpheres - 2000), sizeOfSpheres);
+		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+		{
+			nearestHit = testHit;
+			if(pHitNormal)
+				*pHitNormal = -glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0, 0, sizeOfSpheres - 2000));
 
 		}
 	}
@@ -557,10 +590,78 @@ void Vermilion::MeshEngine::processSceneTextures()
 
 void Vermilion::MeshEngine::createBVH()
 {
-	for(VermiMesh mesh : sceneVermiMeshes)
+	/*for(VermiMesh mesh : sceneVermiMeshes)
 	{
-		
+		mesh.
+	}*/
+
+	auto nFaces = 0;
+
+	std::vector<Object *> tris;
+
+	for (uint32_t x = 0; x < sceneMeshes.size(); ++x)
+	{
+		aiMesh *mesh = sceneMeshes[x];
+		nFaces += mesh->mNumFaces;
+		glm::vec3 v0,v1,v2;
+		glm::vec3 v0n,v1n,v2n;
+		glm::vec2 v0uv,v1uv,v2uv;
+
+		for (uint32_t i = 0; i < mesh->mNumFaces; ++i)
+		{
+			// Get First Face Indices
+			auto temp = mesh->mFaces[i].mIndices[0];
+			v0.x = mesh->mVertices[temp].x;
+			v0.y = mesh->mVertices[temp].y;
+			v0.z = mesh->mVertices[temp].z;
+			v0n.x = mesh->mNormals[temp].x;
+			v0n.y = mesh->mNormals[temp].y;
+			v0n.z = mesh->mNormals[temp].z;
+			if(mesh->HasTextureCoords(0))
+			{
+				v0uv.x = mesh->mTextureCoords[0][temp].x;
+				v0uv.y = mesh->mTextureCoords[0][temp].y;
+			}
+
+			// Get Second Face Indices
+			temp = mesh->mFaces[i].mIndices[1];
+			v1.x = mesh->mVertices[temp].x;
+			v1.y = mesh->mVertices[temp].y;
+			v1.z = mesh->mVertices[temp].z;
+			v1n.x = mesh->mNormals[temp].x;
+			v1n.y = mesh->mNormals[temp].y;
+			v1n.z = mesh->mNormals[temp].z;
+			if(mesh->HasTextureCoords(0))
+			{
+				v1uv.x = mesh->mTextureCoords[0][temp].x;
+				v1uv.y = mesh->mTextureCoords[0][temp].y;
+			}
+
+			// Get Third Face Indices
+			temp = mesh->mFaces[i].mIndices[2];
+			v2.x = mesh->mVertices[temp].x;
+			v2.y = mesh->mVertices[temp].y;
+			v2.z = mesh->mVertices[temp].z;
+			v2n.x = mesh->mNormals[temp].x;
+			v2n.y = mesh->mNormals[temp].y;
+			v2n.z = mesh->mNormals[temp].z;
+			if(mesh->HasTextureCoords(0))
+			{
+				v2uv.x = mesh->mTextureCoords[0][temp].x;
+				v2uv.y = mesh->mTextureCoords[0][temp].y;
+			}
+
+			tris.push_back(new Triangle(
+				v0,v1,v2,
+				v0n,v1n,v2n,
+				v0uv, v1uv, v2uv
+			));
+		}
 	}
+
+	printf("Faces: %d\n", nFaces);
+
+	sceneAccelerator = new BVH(tris);
 }
 
 bool Vermilion::MeshEngine::processScene()

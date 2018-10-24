@@ -50,17 +50,25 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 			0.258823529f,
 			0.203921569f,
 			1.0);
+
+			sampleColour = glm::vec4(
+			1.f,
+			1.f,
+			1.f,
+			1.0);
 		}
 		accumRadiance *= sampleColour;//glm::vec4(sampleColour.x, sampleColour.y, sampleColour.z, 1.f);
 
 		// Shading Models
-		if(distrib(mtRanEngine) >= 0.5)
+		//if(true || distrib(mtRanEngine) >= 0.5)
+		//if (hitMaterial->mProperties[ma]->mSemantic == aiTextureType_DIFFUSE);
+		if(hitMaterial && distrib(mtRanEngine) >= 0.5)
 		{
 			// Perform a Specular sample
 			Vermilion::FLOAT gx = sin(2 * M_PI * distrib(mtRanEngine));
         	Vermilion::FLOAT gy = sin(2 * M_PI * distrib(mtRanEngine));
         	Vermilion::FLOAT gz = sin(2 * M_PI * distrib(mtRanEngine));
-	        glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.55f;
+	        glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.14f;
 			rStart = hitLocation;
 			rDir = glm::normalize(rDir - hitNormal * 2.f * glm::dot(hitNormal, rDir)) + noise;
 		}
@@ -126,7 +134,7 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 				//float homogenousX = ((float(p % cam->uImageU) + distrib(mtRanEngine) - 0.25) / cam->uImageU) * 2 - 1;
 				for(uint16_t sampleY = 0; sampleY < 2; ++sampleY)
 				{
-					for(uint16_t sampleZ = 0; sampleZ < 2; ++sampleZ)
+					for(uint16_t sampleZ = 0; sampleZ < 64; ++sampleZ)
 					{
 						++nTotalSamples;
 	
@@ -163,7 +171,7 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 			newPixelCarrier.red = std::max(std::min(accum.x / nTotalSamples, 1.f), 0.f); // nTotalSamples * (1 / 255.f);
 			newPixelCarrier.green = std::max(std::min(accum.y / nTotalSamples, 1.f), 0.f);
 			newPixelCarrier.blue = std::max(std::min(accum.z / nTotalSamples, 1.f), 0.f);
-			newPixelCarrier.alpha = std::max(std::min(accum.w, 1.f), 0.f);
+			newPixelCarrier.alpha = 1.f;//std::max(std::min(accum.w, 1.f), 0.f);
 			newPixelCarrier.depth = 12.f;
 			cam->setPixelValue(newPixelCarrier);
 		}

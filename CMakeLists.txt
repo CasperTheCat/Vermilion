@@ -39,6 +39,15 @@ set(SOURCE_FILES main.cpp
         core/integrators/integrators.cpp
         core/integrators/pathtracer.cpp
         core/integrators/integrators.h
+        core/accelerators/bvh.cpp
+        core/accelerators/bvh.h
+        core/accelerators/bbox.cpp
+        core/accelerators/bbox.h
+        core/accelerators/triangle.cpp
+        core/accelerators/triangle.h
+        core/accelerators/IntersectionInfo.h
+        core/accelerators/object.h
+        core/accelerators/Ray.h
         )
 
 include_directories(
