@@ -31,6 +31,8 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 		}
 		accumColour += accumRadiance * glm::vec4(hitColour, 1.f);
 
+		//accumColour = glm::vec4(hitNormal, 1.f);
+		//return accumColour;
 
 		if(++depth > 5)
 		{
@@ -68,9 +70,53 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 			Vermilion::FLOAT gx = sin(2 * M_PI * distrib(mtRanEngine));
         	Vermilion::FLOAT gy = sin(2 * M_PI * distrib(mtRanEngine));
         	Vermilion::FLOAT gz = sin(2 * M_PI * distrib(mtRanEngine));
-	        glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.14f;
-			rStart = hitLocation;
-			rDir = glm::normalize(rDir - hitNormal * 2.f * glm::dot(hitNormal, rDir)) + noise;
+	        glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.0f;
+			//rStart = hitLocation;
+			//rDir = glm::normalize(rDir - hitNormal * 2.f * glm::dot(hitNormal, rDir)) + noise;
+
+			rStart = hitLocation - rDir * 0.001f;
+			rDir = glm::normalize(rDir - hitNormal * 2.f * glm::dot(hitNormal, rDir));
+
+
+			//continue;
+
+			/*double nc = 1;
+			double nt = 1.55;
+			bool into = glm::dot(hitNormal, rDir) < 0.f;
+			double nnt = into ? nc / nt : nt / nc;
+			double ddn = glm::dot(hitNormal, rDir);
+			double cos2t = 1 - nnt * nnt * (1 - ddn * ddn);
+			if(cos2t < 0.f)
+			{
+				rDir = glm::normalize(rDir - hitNormal * 2.f * glm::dot(hitNormal, rDir));
+				rStart = hitLocation + rDir * EPSILON;
+				continue;
+			}
+
+			glm::vec3 tdir = glm::normalize(rDir * float(nnt) - hitNormal * float((into ? 1 : -1) * (ddn * nnt + sqrt(cos2t))));
+			double a = nt - nc;
+			double b = nt + nc;
+			double r0 = a * a / (b*b);
+			double c = 1 - (into ? -ddn : glm::dot(tdir, hitNormal));
+			double rE = r0 + (1 - r0) * c * c * c * c * c;
+			double tR = 1 - rE;
+			double pCull = 0.25 + 0.5 * rE;
+			double rP = rE / pCull;
+			double tP = tR / (1 - pCull);
+
+			if(distrib(mtRanEngine) < pCull)
+			{
+				accumRadiance *= rP;
+				rDir = glm::normalize(rDir - hitNormal * 2.f * glm::dot(hitNormal, rDir));
+			}
+			else
+			{
+				accumRadiance *= tP;
+				rDir = tdir;//glm::normalize(rDir - hitNormal * 2.f * glm::dot(hitNormal, rDir));
+			}*/
+
+
+
 		}
 		else
 		{
@@ -83,7 +129,7 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 			glm::vec3 u = glm::normalize(fabs(w.x) > .1 ? glm::vec3(0, 1, 0) : glm::cross(glm::vec3(1, 0, 0), w));
 			glm::vec3 v = glm::cross(w, u);
             glm::vec3 d = glm::normalize(u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2));
-			rStart = hitLocation;
+			rStart = hitLocation - rDir * 0.001f;
 			rDir = d;
 		}
 	}
@@ -134,17 +180,17 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 				//float homogenousX = ((float(p % cam->uImageU) + distrib(mtRanEngine) - 0.25) / cam->uImageU) * 2 - 1;
 				for(uint16_t sampleY = 0; sampleY < 2; ++sampleY)
 				{
-					for(uint16_t sampleZ = 0; sampleZ < 64; ++sampleZ)
+					for(uint32_t sampleZ = 0; sampleZ < (cam->uSamplesPerPixel / 4); ++sampleZ)
 					{
 						++nTotalSamples;
 	
 						//float homogenousX = ((float(p % cam->uImageU) + distrib(mtRanEngine) - 0.25) / cam->uImageU) * 2 - 1;
-						float homogenousX = ((float(p % cam->uImageU) + distrib(mtRanEngine) - 0.25) / cam->uImageU) * 2 - 1;
-						float homogenousY = ((float(p / cam->uImageU) + distrib(mtRanEngine) - 0.25) / cam->uImageV) * 2 - 1;
+						//float homogenousX = ((float(p % cam->uImageU) + distrib(mtRanEngine) - 0.25) / cam->uImageU) * 2 - 1;
+						//float homogenousY = ((float(p / cam->uImageU) + distrib(mtRanEngine) - 0.25) / cam->uImageV) * 2 - 1;
 						
 						
-						//float homogenousX = ((float(p % cam->uImageU) / cam->uImageU) * 2 - 1) + ((distrib(mtRanEngine) - 0.5) * 0.001f);
-						//float homogenousY = ((float(p / cam->uImageU) / cam->uImageV) * 2 - 1) + ((distrib(mtRanEngine) - 0.5) * 0.001f);
+						float homogenousX = ((float(p % cam->uImageU) / cam->uImageU) * 2 - 1) + ((distrib(mtRanEngine) - 0.5) * 0.001f);
+						float homogenousY = ((float(p / cam->uImageU) / cam->uImageV) * 2 - 1) + ((distrib(mtRanEngine) - 0.5) * 0.001f);
 						
 	
 						float cameraBackXCm = homogenousX * cam->sensorSizeX * 0.5;
@@ -166,6 +212,8 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 					}
 				}
 			}
+
+			nTotalSamples = cam->uSamplesPerPixel;
 
 			newPixelCarrier.pixel = p;
 			newPixelCarrier.red = std::max(std::min(accum.x / nTotalSamples, 1.f), 0.f); // nTotalSamples * (1 / 255.f);

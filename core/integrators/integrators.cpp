@@ -4,6 +4,7 @@
 
 #include "integrators.h"
 #include <random>
+#include "../../extern/glm/glm/gtc/matrix_transform.hpp"
 
 void Vermilion::BruteForceTracer::Render(std::vector<Vermilion::Camera*>& cameraList, MeshEngine* mEng)
 {
@@ -11,13 +12,20 @@ void Vermilion::BruteForceTracer::Render(std::vector<Vermilion::Camera*>& camera
 	
 
 	//const glm::vec3 lightDirection = glm::normalize(glm::vec3(-0.5f, 0.f, 0.5f));
-	const glm::vec3 lightLocation = glm::vec3(50, 110, 200);
+	//const glm::vec3 lightLocation = glm::vec3(50, 110, 200);
+	const glm::vec3 lightLocation = glm::vec3(500, 1100, 2000);
 	//const glm::vec3 lightDirection2 = glm::normalize(glm::vec3(0.5f, 10.f, -0.5f));
 	//const float3 lightDirection_f3 = float3(-0.5f,1.f,0.5f);
 
 
 	for (auto cam : cameraList)
 	{
+		glm::mat4 cameraTransform(1);
+
+		// Rotations
+		cameraTransform = glm::rotate(cameraTransform, cam->mRotation.y, glm::vec3(0,1,0));
+		cameraTransform = glm::rotate(cameraTransform, cam->mRotation.x, glm::vec3(1,0,0));
+		cameraTransform = glm::rotate(cameraTransform, cam->mRotation.z, glm::vec3(0,0,1));
 
 		std::mt19937 mtRanEngine(time(0));
 
@@ -34,6 +42,8 @@ void Vermilion::BruteForceTracer::Render(std::vector<Vermilion::Camera*>& camera
 			glm::vec4 accum = glm::vec4(0, 0, 0, 0);
 
 			pixelValue newPixelCarrier;
+
+			
 
 			// Number of times RNG hit
 			uint8_t nRecentHits = 0;
@@ -63,14 +73,19 @@ void Vermilion::BruteForceTracer::Render(std::vector<Vermilion::Camera*>& camera
 				float cameraBackXCm = homogenousX * cam->sensorSizeX * 0.5;
 				float cameraBackYCm = homogenousY * cam->sensorSizeY * 0.5;
 
-				if(mEng->RayCast(cam->mPosition, glm::vec3(cameraBackXCm, -cameraBackYCm, -cam->mDistToFilm), &hitMaterial, &hitLocation, &hitNormal, &hitDistance, &hitUV, nullptr))
+				auto gridPane = glm::vec4(cameraBackXCm, -cameraBackYCm, -cam->mDistToFilm, 1.0f); // Flip from VK to GL space
+				//printf("GRIDPANE: %s\n", glm::to_string(gridPane).c_str());		
+				//printf("GRIDPANE: %s\n", glm::to_string(glm::normalize(gridPane)).c_str());			
+				auto rayDirection = cameraTransform * gridPane;
+
+				if(mEng->RayCast(cam->mPosition,  glm::normalize(glm::vec3(rayDirection) / rayDirection.w), &hitMaterial, &hitLocation, &hitNormal, &hitDistance, &hitUV, nullptr))
 				{
 					glm::vec3 lightDirectionVector = lightLocation - hitLocation;
 					glm::vec3 lightDirection = glm::normalize(lightDirectionVector);
 
 					++nRecentHits;
 					nRecentMisses = 0;
-					float vNDL = glm::dot(lightDirection, glm::normalize(hitNormal)) / glm::length(lightDirectionVector);
+					float vNDL = glm::dot(lightDirection, glm::normalize(hitNormal));// / glm::length(lightDirectionVector);
 
 					// TEMP ASSIGN HERE
 					newPixelCarrier.light = vNDL;
@@ -91,8 +106,8 @@ void Vermilion::BruteForceTracer::Render(std::vector<Vermilion::Camera*>& camera
 					}
 
 					// Shadow
-					if(mEng->RayCastCollision(hitLocation, lightDirection))
-						vNDL = 0.0f;
+					//if(mEng->RayCastCollision(hitLocation, lightDirection))
+					//	vNDL *= 0.00f;
 
 					// Do a second bounce
 					glm::vec3 specHitLocale;
@@ -101,7 +116,9 @@ void Vermilion::BruteForceTracer::Render(std::vector<Vermilion::Camera*>& camera
 					glm::vec2 specHitUV;
 					glm::vec4 resp = glm::vec4(1,1,1,1);
 
-					/*if(mEng->RayCast(hitLocation, hitNormal, nullptr, &specHitLocale, &specHitNormal, &specHitDist, &specHitUV))
+					auto secondBounceDirection = -lightDirection - 2.f * hitNormal * glm::dot(hitNormal, -lightDirection);
+
+					if(mEng->RayCast(hitLocation, secondBounceDirection, nullptr, &specHitLocale, &specHitNormal, &specHitDist, &specHitUV, nullptr))
 					{
 						if(mEng->boundTextures.size() > 1)
 						{
@@ -117,7 +134,9 @@ void Vermilion::BruteForceTracer::Render(std::vector<Vermilion::Camera*>& camera
 					{
 						vNDL *= 0.9f;
 						vNDL += 0.1f;
-					}*/
+					}
+
+					//printf("%f\n", vNDL);
 					
 					if (mEng->boundTextures.size() > 1)
 					{

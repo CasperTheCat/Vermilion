@@ -14,6 +14,12 @@ bool Triangle::getIntersection(const Ray& ray, IntersectionInfo* intersection) c
 	vec3 pvec = cross(rot, e2);
 	float det = dot(e1, pvec);
 
+	/*if(det > 0.f)
+	{
+		// Skip
+		return false;
+	}*/
+
 	// Ray is parallel to plane
 	if (det < 1e-8 && det > -1e-8) {
 		return false;
@@ -55,7 +61,21 @@ glm::vec3 Triangle::getNormal(const IntersectionInfo& I, glm::vec2 *pUV) const
     auto w = glm::length(glm::cross(v0 - v1, v0 - v2));
 	float w0 = glm::length(glm::cross(f1,f2)) / w;
 	float w1 = glm::length(glm::cross(f2,f0)) / w;
-	float w2 = glm::length(glm::cross(f0,f1)) / w;
+	float w2 = 1 - w0 - w1;//glm::length(glm::cross(f0,f1)) / w;
+
+	f0 = v1 - v0;
+	f1 = v2 - v0;
+	f2 = I.hit - v0;
+	float d00 = glm::dot(f0,f0);
+	float d01 = glm::dot(f0,f1);
+	float d11 = glm::dot(f1,f1);
+	float d20 = glm::dot(f2,f0);
+	float d21 = glm::dot(f2,f1);
+	float denom = d00*d11-d01*d01;
+	w1 = (d11 * d20 - d01 * d21) / denom;
+	w2 = (d00 * d21 - d01 * d20) / denom;
+	w0 = 1 - w1 - w2;
+
 
 	auto interpolatedNormal = v0n * w0 + v1n * w1 + v2n * w2;
 	auto interpolatedUV = v0uv * w0 + v1uv * w1 + v2uv * w2;

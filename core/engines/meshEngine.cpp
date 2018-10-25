@@ -93,10 +93,11 @@ bool Vermilion::MeshEngine::load(std::string& fName)
 
 	//int flags = aiProcessPreset_TargetRealtime_MaxQuality | aiProcess_FlipUVs;
 
-	int flags = //aiProcess_FlipWindingOrder | 
-		aiProcess_CalcTangentSpace |
+	int flags = 
+		//aiProcess_FlipWindingOrder | 
+		//aiProcess_CalcTangentSpace |
 		aiProcess_PreTransformVertices |
-		aiProcess_Triangulate |
+		//aiProcess_Triangulate |
 		aiProcess_FlipUVs |
 		aiProcess_GenSmoothNormals |
 		//aiProcess_JoinIdenticalVertices |
@@ -187,6 +188,18 @@ inline float sphereIntersect(const glm::vec3 &pos, const glm::vec3 &rot, const g
 
 bool Vermilion::MeshEngine::RayCastCollision(const glm::vec3& rayStart, const glm::vec3& rayDirection)
 {
+	Ray r(rayStart,rayDirection);
+	IntersectionInfo ii{};
+
+	auto tw = sceneAccelerator->getIntersection(r, &ii, false);
+	if(tw && ii.t > 1e-3) 
+	{
+		//printf("%f\n", ii.t);
+		return tw;
+	}
+	return false;
+
+
 	glm::vec3 v0;
 	glm::vec3 v1;
 	glm::vec3 v2;
@@ -343,7 +356,7 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 		//printf("%f\n", ii.t);
 		nearestHit = ii.t;
 		if(pHitNormal)
-			*pHitNormal = ii.object->getNormal(ii, pHitTexCoord);
+			*pHitNormal = glm::normalize(ii.object->getNormal(ii, pHitTexCoord));
 		hitMeshIndex = 0;//mesh->mMaterialIndex;
 
 	}
