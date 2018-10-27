@@ -8,6 +8,16 @@
 #include "../../extern/glm/glm/gtx/string_cast.hpp"
 #include "../../extern/glm/glm/gtc/matrix_transform.hpp"
 
+inline float glmmax(const glm::vec3 &a)
+{
+	return std::max(a.x, std::max(a.y,a.z));
+}
+
+inline float glmmax(const glm::highp_vec4 &a)
+{
+	return std::max(a.x, std::max(a.y,a.z));
+}
+
 glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir, std::mt19937 mtRanEngine)
 {
 	std::uniform_real_distribution<float> distrib(0, 1);
@@ -16,7 +26,7 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 	float hitDistance;
 	glm::vec3 hitNormal;
 	glm::vec2 hitUV;
-	glm::vec4 accumColour = glm::vec4(0,0,0,0);
+	glm::vec4 accumColour = glm::vec4(0,0,0,-100);
 	glm::vec4 accumRadiance = glm::vec4(1,1,1,1);
 	glm::vec3 hitColour;
 
@@ -29,12 +39,18 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 			// Lets put the sample colour in now!
 			return accumColour;// + accumRadiance * glm::dot(rDir, glm::vec3(0, 1, 0));
 		}
-		accumColour += accumRadiance * glm::vec4(hitColour, 1.f);
+		accumColour += accumRadiance * glm::vec4(hitColour, 0.f);
+		if(depth == 0)
+		{
+			accumColour.w = hitDistance;
+		}
 
 		//accumColour = glm::vec4(hitNormal, 1.f);
 		//return accumColour;
 
-		if(++depth > 5)
+		if(glm::length(hitColour) > 1.f) return accumColour; // Hit a major illuminator
+
+		if(++depth > 5 && distrib(mtRanEngine) > 0.9f || depth > 1000)
 		{
 			return accumColour;
 		}
@@ -59,18 +75,30 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 			1.f,
 			1.0);
 		}
+
+		auto p = glmmax(sampleColour);
+
+		/*if(++depth > 5)
+		{
+            if (distrib(mtRanEngine) < p && depth < 100)
+                sampleColour *= (1 / p);
+            else
+				return accumColour;
+		}*/
+
+
 		accumRadiance *= sampleColour;//glm::vec4(sampleColour.x, sampleColour.y, sampleColour.z, 1.f);
 
 		// Shading Models
 		//if(true || distrib(mtRanEngine) >= 0.5)
 		//if (hitMaterial->mProperties[ma]->mSemantic == aiTextureType_DIFFUSE);
-		if(hitMaterial && distrib(mtRanEngine) >= 0.5)
+		if(hitMaterial && distrib(mtRanEngine) >= 0.75)
 		{
 			// Perform a Specular sample
 			Vermilion::FLOAT gx = sin(2 * M_PI * distrib(mtRanEngine));
         	Vermilion::FLOAT gy = sin(2 * M_PI * distrib(mtRanEngine));
         	Vermilion::FLOAT gz = sin(2 * M_PI * distrib(mtRanEngine));
-	        glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.0f;
+	        glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.04f;
 			//rStart = hitLocation;
 			//rDir = glm::normalize(rDir - hitNormal * 2.f * glm::dot(hitNormal, rDir)) + noise;
 
@@ -89,7 +117,6 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 			if(cos2t < 0.f)
 			{
 				rDir = glm::normalize(rDir - hitNormal * 2.f * glm::dot(hitNormal, rDir));
-				rStart = hitLocation + rDir * EPSILON;
 				continue;
 			}
 
@@ -220,7 +247,7 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 			newPixelCarrier.green = std::max(std::min(accum.y / nTotalSamples, 1.f), 0.f);
 			newPixelCarrier.blue = std::max(std::min(accum.z / nTotalSamples, 1.f), 0.f);
 			newPixelCarrier.alpha = 1.f;//std::max(std::min(accum.w, 1.f), 0.f);
-			newPixelCarrier.depth = 12.f;
+			newPixelCarrier.depth = accum.w;
 			cam->setPixelValue(newPixelCarrier);
 		}
 	}
