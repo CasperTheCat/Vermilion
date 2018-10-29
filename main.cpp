@@ -44,6 +44,10 @@ int main(int argc, char **argv)
     rEng->draw();
     rEng->saveFrame("output");
     
+    delete mEng;
+    delete integrator;
+    delete rEng;
+
 
     return 0;
 }

@@ -51,17 +51,24 @@ Vermilion::MeshEngine::MeshEngine()
 	// Namely, they always log everything regardless of global logger level
 	this->logger = new LogEngine("MeshEngine.log",VermiLogBoth,VermiLogLevelAll);
 	this->bUsingInternalLogger = true;
+	this->sceneAccelerator = nullptr;
 }
 
 Vermilion::MeshEngine::MeshEngine(LogEngine *overrideLogger) : logger(overrideLogger)
 {
 	this->bUsingInternalLogger = false;
+	this->sceneAccelerator = nullptr;
 }
 
 
 Vermilion::MeshEngine::~MeshEngine()
 {
 	if (this->bUsingInternalLogger) delete this->logger;
+	if (this->sceneAccelerator) delete this->sceneAccelerator;
+	// Delete Textures
+	for(auto tex : boundTextures)
+		delete[] tex.pData;
+	
 }
 
 bool Vermilion::MeshEngine::bindTexture(std::string& fName)
@@ -680,6 +687,7 @@ void Vermilion::MeshEngine::createBVH()
 
 	printf("Faces: %d\n", nFaces);
 
+	if(sceneAccelerator) delete sceneAccelerator;
 	sceneAccelerator = new BVH(tris);
 }
 

@@ -50,6 +50,8 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 
 		if(glm::length(hitColour) > 1.f) return accumColour; // Hit a major illuminator
 
+		
+
 		if(++depth > 5 && distrib(mtRanEngine) > 0.9f || depth > 1000)
 		{
 			return accumColour;
@@ -75,7 +77,7 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 			1.f,
 			1.0);
 		}
-
+		//return sampleColour;
 		auto p = glmmax(sampleColour);
 
 		/*if(++depth > 5)
@@ -87,18 +89,18 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 		}*/
 
 
-		accumRadiance *= sampleColour;//glm::vec4(sampleColour.x, sampleColour.y, sampleColour.z, 1.f);
+		// accumRadiance *= sampleColour;//glm::vec4(sampleColour.x, sampleColour.y, sampleColour.z, 1.f);
 
 		// Shading Models
 		//if(true || distrib(mtRanEngine) >= 0.5)
 		//if (hitMaterial->mProperties[ma]->mSemantic == aiTextureType_DIFFUSE);
-		if(hitMaterial && distrib(mtRanEngine) >= 0.75)
+		if(hitMaterial && distrib(mtRanEngine) >= 0.90)
 		{
 			// Perform a Specular sample
 			Vermilion::FLOAT gx = sin(2 * M_PI * distrib(mtRanEngine));
         	Vermilion::FLOAT gy = sin(2 * M_PI * distrib(mtRanEngine));
         	Vermilion::FLOAT gz = sin(2 * M_PI * distrib(mtRanEngine));
-	        glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.04f;
+	        glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.24f;
 			//rStart = hitLocation;
 			//rDir = glm::normalize(rDir - hitNormal * 2.f * glm::dot(hitNormal, rDir)) + noise;
 
@@ -145,8 +147,9 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 
 
 		}
-		else
+		else if(hitMaterial)
 		{
+			accumRadiance *= sampleColour;
 			// Diffuse Hit
             float r1 = 2 * M_PI * distrib(mtRanEngine);
 			float r2 = distrib(mtRanEngine);
@@ -155,6 +158,20 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
             glm::vec3 w = glm::dot(hitNormal, rDir) < 0.f ? hitNormal : hitNormal * -1.f;
 			glm::vec3 u = glm::normalize(fabs(w.x) > .1 ? glm::vec3(0, 1, 0) : glm::cross(glm::vec3(1, 0, 0), w));
 			glm::vec3 v = glm::cross(w, u);
+            glm::vec3 d = glm::normalize(u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2));
+			rStart = hitLocation - rDir * 0.001f;
+			rDir = d;
+		}
+		else
+		{
+			// Diffuse Hit
+            float r1 = 2 * M_PI * distrib(mtRanEngine);
+			float r2 = distrib(mtRanEngine);
+			float r2s = sqrt(r2);
+
+            glm::vec3 w = glm::dot(hitNormal, rDir) < 0.f ? hitNormal : hitNormal * -1.f;
+			glm::vec3 u = glm::normalize(fabs(w.x) > .1 ? glm::vec3(0, 1, 0) : glm::cross(w, glm::vec3(1, 0, 0)));
+			glm::vec3 v = glm::cross(u, w);
             glm::vec3 d = glm::normalize(u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2));
 			rStart = hitLocation - rDir * 0.001f;
 			rDir = d;

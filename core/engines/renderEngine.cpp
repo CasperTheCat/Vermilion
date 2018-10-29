@@ -49,14 +49,17 @@ Vermilion::RenderEngine::RenderEngine(MeshEngine *mEng, LogEngine *lEng) :
 void Vermilion::RenderEngine::Initialise()
 {
     mIntegrator = new BruteForceTracer();
+    bHasInternalIntegrator = true;
 }
 
 Vermilion::RenderEngine::~RenderEngine()
 {
     // The only data we have to remove currently is the camera and the log engine if it is internal
     if (bHasInternalLogEng) delete mLogEngine;
+    if (bHasInternalIntegrator) delete mIntegrator;
 	for (uint32_t i = 0; i < mCameras.size(); ++i)
 		if (mCameras[i]) delete mCameras[i];
+    //delete[] mCameras;
 }
 
 void Vermilion::RenderEngine::assignIntegrator(Integrator *externalIntegrator)
