@@ -18,9 +18,9 @@ inline float glmmax(const glm::highp_vec4 &a)
 	return std::max(a.x, std::max(a.y,a.z));
 }
 
-glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir, std::mt19937 mtRanEngine)
+glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir, std::mt19937 &mtRanEngine)
 {
-	std::uniform_real_distribution<float> distrib(0, 1);
+	std::uniform_real_distribution<double> distrib(0, 1);
 	aiMaterial *hitMaterial;
 	glm::vec3 hitLocation;
 	float hitDistance;
@@ -52,7 +52,7 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 
 		
 
-		if(++depth > 5 && distrib(mtRanEngine) > 0.9f || depth > 1000)
+		if(++depth > 5 && distrib(mtRanEngine) > 0.95f || depth > 1000)
 		{
 			return accumColour;
 		}
@@ -94,7 +94,7 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 		// Shading Models
 		//if(true || distrib(mtRanEngine) >= 0.5)
 		//if (hitMaterial->mProperties[ma]->mSemantic == aiTextureType_DIFFUSE);
-		if(hitMaterial && distrib(mtRanEngine) >= 0.90)
+		if(hitMaterial && distrib(mtRanEngine) >= 0.96)
 		{
 			// Perform a Specular sample
 			Vermilion::FLOAT gx = sin(2 * M_PI * distrib(mtRanEngine));
@@ -168,13 +168,24 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
             float r1 = 2 * M_PI * distrib(mtRanEngine);
 			float r2 = distrib(mtRanEngine);
 			float r2s = sqrt(r2);
+			
+			//Vermilion::FLOAT gx = sin(2 * M_PI * distrib(mtRanEngine));
+        	//Vermilion::FLOAT gy = sin(2 * M_PI * distrib(mtRanEngine));
+        	//Vermilion::FLOAT gz = sin(2 * M_PI * distrib(mtRanEngine));
+	        //glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.95f;
+
+			Vermilion::FLOAT gx = 2.f * distrib(mtRanEngine) - 1;
+        	Vermilion::FLOAT gy = 2.f * distrib(mtRanEngine) - 1;
+        	Vermilion::FLOAT gz = 2.f * distrib(mtRanEngine) - 1;
+	        glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.95f;
 
             glm::vec3 w = glm::dot(hitNormal, rDir) < 0.f ? hitNormal : hitNormal * -1.f;
-			glm::vec3 u = glm::normalize(fabs(w.x) > .1 ? glm::vec3(0, 1, 0) : glm::cross(w, glm::vec3(1, 0, 0)));
-			glm::vec3 v = glm::cross(u, w);
+			glm::vec3 u = glm::normalize(fabs(w.x) > .1 ? glm::vec3(0, 0, 1) : glm::cross(glm::vec3(1, 0, 0), w));
+			glm::vec3 v = glm::cross(w, u);
             glm::vec3 d = glm::normalize(u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2));
 			rStart = hitLocation - rDir * 0.001f;
-			rDir = d;
+			rDir = d;//glm::normalize((rDir - hitNormal * 2.f * glm::dot(hitNormal, rDir)) + noise);
+
 		}
 	}
 }
@@ -191,7 +202,7 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 
 	for (auto cam : cameraList)
 	{
-		std::mt19937 mtRanEngine(time(0));
+		//std::mt19937 mtRanEngine(time(0));
 
 		// Rotate the camera
 		//glm::mat4 cameraTransform = glm::eulerAngleYXZ(cam->mRotation.y, cam->mRotation.x, cam->mRotation.z);
@@ -202,13 +213,15 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 		cameraTransform = glm::rotate(cameraTransform, cam->mRotation.x, glm::vec3(1,0,0));
 		cameraTransform = glm::rotate(cameraTransform, cam->mRotation.z, glm::vec3(0,0,1));
 
-		printf("%s\n", glm::to_string(cameraTransform).c_str());
+		//printf("%s\n", glm::to_string(cameraTransform).c_str());
 		
 
 		#pragma omp parallel for schedule(dynamic, 1)
 		for (uint64_t p = 0; p < cam->RenderTargetSize; ++p)
 		{
+			fprintf(stderr, "\rRendering (%d spp) %5.2f%%", cam->uSamplesPerPixel, 100. * p / (cam->RenderTargetSize - 1));
 			std::uniform_real_distribution<float> distrib(0, 0.5);
+			thread_local std::mt19937 mtRanEngine(std::random_device{}());
 
 			pixelValue newPixelCarrier;
 			glm::vec4 accum = glm::vec4(0,0,0,0);
@@ -225,20 +238,25 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 				for(uint16_t sampleY = 0; sampleY < 2; ++sampleY)
 				{
 					for(uint32_t sampleZ = 0; sampleZ < (cam->uSamplesPerPixel / 4); ++sampleZ)
-					{
+					{	
 						++nTotalSamples;
-	
 						//float homogenousX = ((float(p % cam->uImageU) + distrib(mtRanEngine) - 0.25) / cam->uImageU) * 2 - 1;
-						//float homogenousX = ((float(p % cam->uImageU) + distrib(mtRanEngine) - 0.25) / cam->uImageU) * 2 - 1;
-						//float homogenousY = ((float(p / cam->uImageU) + distrib(mtRanEngine) - 0.25) / cam->uImageV) * 2 - 1;
+						float homogenousX = ((float(p % cam->uImageU) + (sampleX * 0.5f - 0.5f) + distrib(mtRanEngine) - 0.25) / cam->uImageU) - 0.5;// * 2 - 1;
+						float homogenousY = ((float(p / cam->uImageU) + (sampleY * 0.5f - 0.5f) + distrib(mtRanEngine) - 0.25) / cam->uImageV) - 0.5;//* 2 - 1;
 						
 						
-						float homogenousX = ((float(p % cam->uImageU) / cam->uImageU) * 2 - 1) + ((distrib(mtRanEngine) - 0.5) * 0.001f);
-						float homogenousY = ((float(p / cam->uImageU) / cam->uImageV) * 2 - 1) + ((distrib(mtRanEngine) - 0.5) * 0.001f);
+						//float homogenousX = ((float(p % cam->uImageU) / cam->uImageU) * 2 - 1);// + ((distrib(mtRanEngine) - 0.5) * 0.001f);
+						//float homogenousY = ((float(p / cam->uImageU) / cam->uImageV) * 2 - 1);// + ((distrib(mtRanEngine) - 0.5) * 0.001f);
 						
-	
-						float cameraBackXCm = homogenousX * cam->sensorSizeX * 0.5;
-						float cameraBackYCm = homogenousY * cam->sensorSizeY * 0.5;
+						//float homogenousX = ((float(p % cam->uImageU) / cam->uImageU) * 2 - 1) + float(sampleX) / (cam->uImageU * 4);
+						//float homogenousY = ((float(p / cam->uImageU) / cam->uImageV) * 2 - 1) + float(sampleY) / (cam->uImageV * 4);
+						
+						//double homogenousX = ((double(p % cam->uImageU) / cam->uImageU) * 2 - 1) + double(sampleX) * (1 / cam->uImageU);
+						//double homogenousY = ((double(p / cam->uImageU) / cam->uImageV) * 2 - 1) + double(sampleY) * (1 / cam->uImageV);
+						
+
+						float cameraBackXCm = homogenousX * cam->sensorSizeX;// * 0.5;
+						float cameraBackYCm = homogenousY * cam->sensorSizeY;// * 0.5;
 	
 						//accum += Radiance(mEng, cam->mPosition, glm::vec3(cameraBackXCm, -cameraBackYCm, -cam->mDistToFilm), mtRanEngine);// * 0.01f;
 						//accum += Radiance(mEng, cam->mPosition, glm::vec3(cameraBackYCm, -cameraBackXCm, -cam->mDistToFilm), mtRanEngine);// * 0.01f;
@@ -252,19 +270,50 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 						auto rayDirection = cameraTransform * gridPane;
 						//printf("%s\n", glm::to_string(rayDirection).c_str());
 						//printf("%s\n", glm::to_string(glm::normalize(rayDirection)).c_str());
-						accum += Radiance(mEng, cam->mPosition, glm::normalize(glm::vec3(rayDirection) / rayDirection.w),  mtRanEngine);// * 0.01f;
+						auto sampleRadiance = Radiance(mEng, cam->mPosition, glm::normalize(glm::vec3(rayDirection) / rayDirection.w),  mtRanEngine);// * 0.01f;
+						
+						auto temp = accum;// + sampleRadiance;
+						accum += sampleRadiance;
+						auto numer = accum - temp;
+						auto denom = accum + temp;
+
+						auto difference = fabs(glm::length(glm::vec3(numer / denom)));
+
+						// Early Stopping
+						if
+						(
+							nTotalSamples > sqrt(cam->uSamplesPerPixel)
+
+							&&
+
+							//(difference * 2) < 0.00001f
+							fabs(glm::length(
+								glm::vec3(accum) / float(nTotalSamples)
+							 	- 
+								glm::vec3(accum + sampleRadiance) / float(nTotalSamples + 1)
+								)) < 0.01f
+
+							// Difference of Vectors
+							
+
+
+						)
+						{
+							//printf("%d\n", nTotalSamples);
+							break;
+						}
 					}
 				}
 			}
 
-			nTotalSamples = cam->uSamplesPerPixel;
+			//nTotalSamples = cam->uSamplesPerPixel;
 
 			newPixelCarrier.pixel = p;
 			newPixelCarrier.red = std::max(std::min(accum.x / nTotalSamples, 1.f), 0.f); // nTotalSamples * (1 / 255.f);
 			newPixelCarrier.green = std::max(std::min(accum.y / nTotalSamples, 1.f), 0.f);
 			newPixelCarrier.blue = std::max(std::min(accum.z / nTotalSamples, 1.f), 0.f);
 			newPixelCarrier.alpha = 1.f;//std::max(std::min(accum.w, 1.f), 0.f);
-			newPixelCarrier.depth = accum.w;
+			newPixelCarrier.depth = nTotalSamples;//accum.w;
 			cam->setPixelValue(newPixelCarrier);
 		}
 	}
