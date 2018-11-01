@@ -3,16 +3,22 @@
 #define VERMILION_MESH_ENGINE_H
 
 #include <vector>
-#include "../../extern/assimp/Importer.hpp"
+/*#include "../../extern/assimp/Importer.hpp"
 #include "../../extern/assimp/scene.h"
 #include "../../extern/assimp/postprocess.h"
-#include "../../extern/assimp/cimport.h"
-#include "loggingEngine.h"
-#include "../types/types.h"
-#include "../camera/camera.h"
-#include "../../extern/glm/glm/glm.hpp"
+#include "../../extern/assimp/cimport.h"*/
 
-#include "../accelerators/bvh.h"
+#include "assimp/Importer.hpp"
+#include "assimp/scene.h"
+#include "assimp/postprocess.h"
+#include "assimp/cimport.h"
+
+#include "engines/loggingEngine.h"
+#include "types/types.h"
+#include "camera/camera.h"
+#include "common.h"
+
+#include "accelerators/bvh.h"
 
 namespace Vermilion
 {

@@ -4,9 +4,9 @@
 
 #include "integrators.h"
 #include <random>
-#include "../../extern/glm/glm/gtx/euler_angles.hpp"
-#include "../../extern/glm/glm/gtx/string_cast.hpp"
-#include "../../extern/glm/glm/gtc/matrix_transform.hpp"
+//#include "glm/gtx/euler_angles.hpp"
+//#include "glm/gtx/string_cast.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 inline float glmmax(const glm::vec3 &a)
 {
@@ -18,9 +18,9 @@ inline float glmmax(const glm::highp_vec4 &a)
 	return std::max(a.x, std::max(a.y,a.z));
 }
 
-glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir, std::mt19937 &mtRanEngine)
+glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir, std::mt19937_64 &mtRanEngine)
 {
-	std::uniform_real_distribution<double> distrib(0, 1);
+	std::uniform_real_distribution<double> distrib(0.0, 1.0);
 	aiMaterial *hitMaterial;
 	glm::vec3 hitLocation;
 	float hitDistance;
@@ -39,6 +39,7 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 			// Lets put the sample colour in now!
 			return accumColour;// + accumRadiance * glm::dot(rDir, glm::vec3(0, 1, 0));
 		}
+
 		accumColour += accumRadiance * glm::vec4(hitColour, 0.f);
 		if(depth == 0)
 		{
@@ -52,7 +53,7 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 
 		
 
-		if(++depth > 5 && distrib(mtRanEngine) > 0.95f || depth > 1000)
+		if(++depth > 5 && (distrib(mtRanEngine) > 0.95f || depth > 1000))
 		{
 			return accumColour;
 		}
@@ -100,7 +101,7 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 			Vermilion::FLOAT gx = sin(2 * M_PI * distrib(mtRanEngine));
         	Vermilion::FLOAT gy = sin(2 * M_PI * distrib(mtRanEngine));
         	Vermilion::FLOAT gz = sin(2 * M_PI * distrib(mtRanEngine));
-	        glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.24f;
+	        glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.48f;
 			//rStart = hitLocation;
 			//rDir = glm::normalize(rDir - hitNormal * 2.f * glm::dot(hitNormal, rDir)) + noise;
 
@@ -152,39 +153,45 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 			accumRadiance *= sampleColour;
 			// Diffuse Hit
             float r1 = 2 * M_PI * distrib(mtRanEngine);
-			float r2 = distrib(mtRanEngine);
+			float r2 = 10 * distrib(mtRanEngine);
 			float r2s = sqrt(r2);
 
             glm::vec3 w = glm::dot(hitNormal, rDir) < 0.f ? hitNormal : hitNormal * -1.f;
-			glm::vec3 u = glm::normalize(fabs(w.x) > .1 ? glm::vec3(0, 1, 0) : glm::cross(glm::vec3(1, 0, 0), w));
+			glm::vec3 u = glm::normalize(glm::cross(fabs(w.x) > .1 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0), w));
 			glm::vec3 v = glm::cross(w, u);
-            glm::vec3 d = glm::normalize(u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2));
+            glm::vec3 d = glm::normalize(u * float(cos(r1)) * r2s + v * float(sin(r1)) * r2s + w * float(sqrt(1 - r2)));
 			rStart = hitLocation - rDir * 0.001f;
 			rDir = d;
 		}
 		else
 		{
 			// Diffuse Hit
-            float r1 = 2 * M_PI * distrib(mtRanEngine);
-			float r2 = distrib(mtRanEngine);
+            double r1 = 2 * M_PI * distrib(mtRanEngine);
+			double r2 = 10 * distrib(mtRanEngine);
 			float r2s = sqrt(r2);
 			
-			//Vermilion::FLOAT gx = sin(2 * M_PI * distrib(mtRanEngine));
-        	//Vermilion::FLOAT gy = sin(2 * M_PI * distrib(mtRanEngine));
-        	//Vermilion::FLOAT gz = sin(2 * M_PI * distrib(mtRanEngine));
+			Vermilion::FLOAT gx = cos(2 * M_PI * distrib(mtRanEngine));
+        	Vermilion::FLOAT gy = cos(2 * M_PI * distrib(mtRanEngine));
+        	Vermilion::FLOAT gz = cos(2 * M_PI * distrib(mtRanEngine));
 	        //glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.95f;
 
-			Vermilion::FLOAT gx = 2.f * distrib(mtRanEngine) - 1;
-        	Vermilion::FLOAT gy = 2.f * distrib(mtRanEngine) - 1;
-        	Vermilion::FLOAT gz = 2.f * distrib(mtRanEngine) - 1;
+			//Vermilion::FLOAT gx = 2.f * distrib(mtRanEngine) - 1.f;
+        	//Vermilion::FLOAT gy = 2.f * distrib(mtRanEngine) - 1.f;
+        	//Vermilion::FLOAT gz = 2.f * distrib(mtRanEngine) - 1.f;
 	        glm::vec3 noise = glm::vec3(gx,gy,gz) * 0.95f;
 
             glm::vec3 w = glm::dot(hitNormal, rDir) < 0.f ? hitNormal : hitNormal * -1.f;
-			glm::vec3 u = glm::normalize(fabs(w.x) > .1 ? glm::vec3(0, 0, 1) : glm::cross(glm::vec3(1, 0, 0), w));
+			//w = glm::normalize(w * w);
+			glm::vec3 u = glm::normalize(glm::cross(fabs(w.x) > .1 ? glm::vec3(0, 1, 0) : glm::vec3(1, 0, 0), w));
+			//u = glm::normalize(u * u);
 			glm::vec3 v = glm::cross(w, u);
-            glm::vec3 d = glm::normalize(u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2));
+            glm::vec3 d = glm::normalize(u * float(cos(r1)) * r2s + v * float(sin(r1)) * r2s + w * float(sqrt(1 - r2)));
 			rStart = hitLocation - rDir * 0.001f;
 			rDir = d;//glm::normalize((rDir - hitNormal * 2.f * glm::dot(hitNormal, rDir)) + noise);
+
+			//accumColour = glm::vec4(w.r, w.g, w.b, 1);
+			//accumColour = glm::vec4(u.r,u.g,u.b, 1);
+			//return accumColour;
 
 		}
 	}
@@ -196,7 +203,7 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 	
 
 	//const glm::vec3 lightDirection = glm::normalize(glm::vec3(-0.5f, 0.f, 0.5f));
-	const glm::vec3 lightLocation = glm::vec3(50, 110, 200);
+	//const glm::vec3 lightLocation = glm::vec3(50, 110, 200);
 	//const glm::vec3 lightDirection2 = glm::normalize(glm::vec3(0.5f, 10.f, -0.5f));
 	//const float3 lightDirection_f3 = float3(-0.5f,1.f,0.5f);
 
@@ -221,7 +228,7 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 		{
 			fprintf(stderr, "\rRendering (%d spp) %5.2f%%", cam->uSamplesPerPixel, 100. * p / (cam->RenderTargetSize - 1));
 			std::uniform_real_distribution<float> distrib(0, 0.5);
-			thread_local std::mt19937 mtRanEngine(std::random_device{}());
+			thread_local std::mt19937_64 mtRanEngine(std::random_device{}());
 
 			pixelValue newPixelCarrier;
 			glm::vec4 accum = glm::vec4(0,0,0,0);
@@ -291,7 +298,7 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 								glm::vec3(accum) / float(nTotalSamples)
 							 	- 
 								glm::vec3(accum + sampleRadiance) / float(nTotalSamples + 1)
-								)) < 0.01f
+								)) < 0.00001f
 
 							// Difference of Vectors
 							
@@ -316,5 +323,6 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 			newPixelCarrier.depth = nTotalSamples;//accum.w;
 			cam->setPixelValue(newPixelCarrier);
 		}
+		fprintf(stderr, "\n");
 	}
 }

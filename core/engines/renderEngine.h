@@ -5,9 +5,9 @@
 #ifndef VERMILION_RENDERENGINE_H
 #define VERMILION_RENDERENGINE_H
 
-#include "../camera/camera.h"
-#include "meshEngine.h"
-#include "../integrators/integrators.h"
+#include "camera/camera.h"
+#include "engines/meshEngine.h"
+#include "integrators/integrators.h"
 
 
 namespace Vermilion

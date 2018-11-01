@@ -4,7 +4,7 @@
 
 #ifndef VERMILION_INTEGRATORS_H
 #define VERMILION_INTEGRATORS_H
-#include "../camera/camera.h"
+#include "camera/camera.h"
 
 namespace Vermilion
 {

@@ -1,5 +1,5 @@
 #pragma once
-#include "../../extern/glm/glm/glm.hpp"
+#include "common.h"
 
 class Object;
 

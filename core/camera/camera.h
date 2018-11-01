@@ -7,13 +7,13 @@
 
 #include <cstdint>
 #include <vector>
-#include "../types/types.h"
-#include "frameTile/frameTile.h"
+#include "types/types.h"
+#include "camera/frameTile/frameTile.h"
 #include <string>
-#include "../engines/meshEngine.h"
+#include "engines/meshEngine.h"
 #include <mutex>
-// GLM
-#include "../../extern/glm/glm/glm.hpp"
+
+#include "common.h"
 
 namespace Vermilion
 {
