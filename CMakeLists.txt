@@ -21,7 +21,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -Wall -ggdb")
 #FIND_PACKAGE(Boost COMPONENTS system filesystem REQUIRED)
 #FIND_PACKAGE(OpenEXR)
 FIND_PACKAGE(OpenImageIO REQUIRED)
-FIND_PACKAGE(assimp REQUIRED)
+FIND_PACKAGE(Assimp REQUIRED)
+FIND_PACKAGE(GLM REQUIRED)
 #FIND_PACKAGE(OpenImageIO)
 
 
@@ -54,19 +55,18 @@ set(SOURCE_FILES main.cpp
 include_directories(
         ${Boost_INCLUDE_DIRS}
         ${OIIO_INCLUDE_DIRS}
+        ${GLM_INCLUDE_DIRS}
         ${ASSIMP_INCLUDE_DIRS}
-        ${CMAKE_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/core
 )
 
 #link_directories(${CMAKE_SOURCE_DIR}/lib)
 
 add_executable(Vermilion ${SOURCE_FILES})
 
-
-MESSAGE( STATUS "CMAwe:         " ${ASSIMP_LIBRARIES} )
 target_link_libraries(Vermilion
     ${ASSIMP_LIBRARIES}
-    #${CMAKE_SOURCE_DIR}/lib/libassimp.so.3.3.1 
     ${Boost_LIBRARIES} 
     ${OIIO_LIBRARIES}
 )
+

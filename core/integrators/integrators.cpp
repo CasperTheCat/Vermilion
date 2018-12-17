@@ -4,7 +4,7 @@
 
 #include "integrators.h"
 #include <random>
-#include "../../extern/glm/glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 void Vermilion::BruteForceTracer::Render(std::vector<Vermilion::Camera*>& cameraList, MeshEngine* mEng)
 {

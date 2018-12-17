@@ -82,7 +82,7 @@ glm::vec3 Triangle::getNormal(const IntersectionInfo& I, glm::vec2 *pUV) const
 	if(pUV)
 		*pUV = interpolatedUV;
 
-    return interpolatedNormal;
+    return -interpolatedNormal; // DirectX
 }
 
 inline glm::vec3 glmmin3(const glm::vec3& a, const glm::vec3& b)

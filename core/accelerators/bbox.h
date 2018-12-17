@@ -1,6 +1,6 @@
 #pragma once
 #include "Ray.h"
-#include "../../extern/glm/glm/glm.hpp"
+#include "common.h"
 #include <stdint.h>
 
 struct BBox {

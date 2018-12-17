@@ -3,7 +3,7 @@
 //
 
 #include "renderEngine.h"
-#include "core/camera/camera.h"
+#include "camera/camera.h"
 // Since this is a render engine. We will have own logger.
 Vermilion::RenderEngine::RenderEngine() :
         mMeshEngine(nullptr),
@@ -103,21 +103,25 @@ void Vermilion::RenderEngine::draw()
         mLogEngine->logWarn("Renderer has no camera... Defaulting");
         // Default vars
         Vermilion::cameraSettings vcs;
-        vcs.imageResX = 2592/4;
-        vcs.imageResY = 1728/4;
+        vcs.imageResX = 2592;
+        vcs.imageResY = 1728;
+        
         //vcs.position = float3(0,0,200);
-        vcs.position = float3(-900,300,1200);
+        //vcs.position = float3(-900,300,1200);
         //vcs.position = float3(0,250,800);
-        vcs.position = float3(-40,158,80);
+        //vcs.position = float3(-40,158,80);
         //vcs.position = float3(0,350,-1500);
         vcs.position = float3(-200, 80, 400);
         vcs.position = float3(-4000, 1600, 8000);
+        //vcs.position = float3(0,250,800);
         vcs.rotation = float3(15, 180, 0);
         vcs.rotation = float3(5, 45, 0);
         vcs.rotation = float3(0, 25, 0);
-        vcs.fBackDistance = 3.f ;//* 2;
+        //vcs.rotation = float3(0, 0, 0);
+
+        vcs.fBackDistance = 3.f * 2;
         vcs.horAngleOfView = 90.f;
-        vcs.raysPerPixel = 2048;
+        vcs.raysPerPixel = 128;
         vcs.fBackSizeX = 3.6f;
         vcs.fBackSizeY = 2.4f;
         vcs.rayMaxBounces = 5;
