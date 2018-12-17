@@ -1,7 +1,7 @@
 ////// Vermilion Mesh Engine
 
 #include "meshEngine.h"
-#include "../accelerators/triangle.h"
+#include "core/accelerators/triangle.h"
 #include "OpenImageIO/imagebuf.h"
 
 Vermilion::VermiTexture::VermiTexture
@@ -404,7 +404,7 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 
 	}*/
 
-	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0, 1000, 0), 250.f);
+	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0, 5000, 100), 250.f);
 	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 	{
 		nearestHit = testHit;
@@ -419,7 +419,7 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 
 
 	{
-		auto sizeOfSpheres = 1e2 * 5;
+		auto sizeOfSpheres = 1e5 * 5;
 		// TopBottom
 		/*testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,-sizeOfSpheres + 1000,0), sizeOfSpheres);
 		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck

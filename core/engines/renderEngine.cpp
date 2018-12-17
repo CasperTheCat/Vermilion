@@ -3,7 +3,7 @@
 //
 
 #include "renderEngine.h"
-#include "../camera/camera.h"
+#include "core/camera/camera.h"
 // Since this is a render engine. We will have own logger.
 Vermilion::RenderEngine::RenderEngine() :
         mMeshEngine(nullptr),
@@ -111,6 +111,7 @@ void Vermilion::RenderEngine::draw()
         vcs.position = float3(-40,158,80);
         //vcs.position = float3(0,350,-1500);
         vcs.position = float3(-200, 80, 400);
+        vcs.position = float3(-4000, 1600, 8000);
         vcs.rotation = float3(15, 180, 0);
         vcs.rotation = float3(5, 45, 0);
         vcs.rotation = float3(0, 25, 0);
