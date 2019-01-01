@@ -26,7 +26,7 @@ FIND_PACKAGE(GLM REQUIRED)
 #FIND_PACKAGE(OpenImageIO)
 
 
-set(SOURCE_FILES main.cpp
+set(SOURCE_FILES
         core/engines/renderEngine.cpp
         core/engines/renderEngine.h
         core/engines/meshEngine.cpp
@@ -52,17 +52,31 @@ set(SOURCE_FILES main.cpp
         core/accelerators/Ray.h
         )
 
+set(FRONT_END
+    main.cpp
+    extern/imgui/imgui.h
+    extern/imgui/imgui_internal.h
+    extern/imgui/imstb_rectpack.h
+    extern/imgui/imstb_textedit.h
+    extern/imgui/imstb_truetype.h
+    extern/imgui/imgui.cpp
+    extern/imgui/imgui_demo.cpp
+    extern/imgui/imgui_draw.cpp
+    extern/imgui/imgui_widgets.cpp
+)
+
 include_directories(
         ${Boost_INCLUDE_DIRS}
         ${OIIO_INCLUDE_DIRS}
         ${GLM_INCLUDE_DIRS}
         ${ASSIMP_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/core
+        ${CMAKE_SOURCE_DIR}/extern
 )
 
 #link_directories(${CMAKE_SOURCE_DIR}/lib)
 
-add_executable(Vermilion ${SOURCE_FILES})
+add_executable(Vermilion ${FRONT_END} ${SOURCE_FILES})
 
 target_link_libraries(Vermilion
     ${ASSIMP_LIBRARIES}
