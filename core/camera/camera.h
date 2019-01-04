@@ -104,7 +104,7 @@ class Camera
 	vermRenderMode renderMode;
 
 	/// Rays are spawned from camera origin and trace based on rotation
-	/// Default camera alignment is along X
+	/// Default camera alignment is along Z
   private:
 	// Functions
 	void GenerateTileSet();

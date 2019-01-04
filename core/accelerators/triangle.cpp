@@ -1,4 +1,5 @@
 #include "triangle.h"
+#include <algorithm>
 
 bool Triangle::getIntersection(const Ray& ray, IntersectionInfo* intersection) const
 {

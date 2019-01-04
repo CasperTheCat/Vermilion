@@ -5,14 +5,10 @@
 #include "imgui/imgui.h"
 #include "imgui/examples/imgui_impl_vulkan.h"
 #include "imgui/examples/imgui_impl_sdl.h"
-#include "vulkan/vulkan.h"
+#include "core/renderer/renderer.h"
+#include <vulkan/vulkan.h>
 
 using namespace Vermilion;
-
-void vk_setup()
-{
-    return;
-}
 
 void immode(RenderEngine *rEng)
 {
@@ -25,14 +21,16 @@ void immode(RenderEngine *rEng)
     int tex_w, tex_h;
     io.Fonts->GetTexDataAsRGBA32(&tex_pixels, &tex_w, &tex_h);
     ImGui::StyleColorsDark();
+	io.DisplaySize = ImVec2(550, 680);
+	io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
     //ImGui::SetNextWindowPos(ImVec2(650, 20), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(550, 680));//, ImGuiCond_FirstUseEver);
-    ImGui::NewFrame();
+
 
     bool bRun = true;
     while(bRun)
     {
-        printf("Hi\n");
+		ImGui::NewFrame();
         ImGui::Begin("My First Tool", &bRun, ImGuiWindowFlags_MenuBar);
         //ImGui::Text("Hi");
         /*if(ImGui::Button("Render"))
@@ -66,8 +64,7 @@ int main(int argc, char **argv)
 
     if (argc < 2)
     {
-        // Full Immediate Mode
-        immode(rEng);
+        rEng->createVulkanPreview();
     }
     else
     {

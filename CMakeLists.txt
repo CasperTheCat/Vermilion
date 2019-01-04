@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.7)
 project(Vermilion)
 
 #set(Boost_USE_STATIC_LIBS TRUE)
@@ -22,9 +22,17 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -Wall -ggdb")
 #FIND_PACKAGE(OpenEXR)
 FIND_PACKAGE(OpenImageIO REQUIRED)
 FIND_PACKAGE(Assimp REQUIRED)
+FIND_PACKAGE(Threads REQUIRED)
 FIND_PACKAGE(GLM REQUIRED)
-#FIND_PACKAGE(OpenImageIO)
+FIND_PACKAGE(Vulkan)
 
+set(USE_GUI true CACHE BOOL "Disable GUI")
+if (Vulkan_FOUND OR USE_GUI)
+    add_definitions(-DUseGUI)
+    
+endif()
+
+#FIND_PACKAGE(OpenImageIO)
 
 set(SOURCE_FILES
         core/engines/renderEngine.cpp
@@ -50,6 +58,9 @@ set(SOURCE_FILES
         core/accelerators/IntersectionInfo.h
         core/accelerators/object.h
         core/accelerators/Ray.h
+        core/renderer/renderer.cpp
+        core/renderer/renderer.h
+        core/renderer/tools.h
         )
 
 set(FRONT_END
@@ -66,21 +77,27 @@ set(FRONT_END
 )
 
 include_directories(
-        ${Boost_INCLUDE_DIRS}
+        ${Vulkan_INCLUDE_DIRS}
         ${OIIO_INCLUDE_DIRS}
         ${GLM_INCLUDE_DIRS}
         ${ASSIMP_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/core
         ${CMAKE_SOURCE_DIR}/extern
+        ${CMAKE_SOURCE_DIR}/extern/glfw/include
 )
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/extern/glfw)
 
 #link_directories(${CMAKE_SOURCE_DIR}/lib)
 
 add_executable(Vermilion ${FRONT_END} ${SOURCE_FILES})
 
 target_link_libraries(Vermilion
+    glfw
     ${ASSIMP_LIBRARIES}
     ${Boost_LIBRARIES} 
     ${OIIO_LIBRARIES}
+    ${Vulkan_LIBRARIES}
+    ${GLFW_LIBRARIES}
 )
 

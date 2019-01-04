@@ -8,6 +8,8 @@
 #include "camera/camera.h"
 #include "engines/meshEngine.h"
 #include "integrators/integrators.h"
+#include "renderer/renderer.h"
+#include <thread>
 
 
 namespace Vermilion
@@ -30,9 +32,16 @@ namespace Vermilion
         LogEngine* mLogEngine;
         bool bHasInternalLogEng;
 
+        // Vulkan Preview Window
+        class VkRenderer *mRtPreview;
+        std::thread mPreviewThread;
+
 
     private:
         void Initialise();
+        void CreateInternalDefaultCamera();
+
+        void PreviewThread_RT();
 
     public:
         RenderEngine();
@@ -45,10 +54,14 @@ namespace Vermilion
 
 		void saveFrame(std::string name);
 
+        void setPrimaryCamera();
+
         // Engine Assignment
         void assignEngine(MeshEngine *mEng);
         void assignEngine(LogEngine *lEng);
         void assignIntegrator(Integrator *externalIntegrator);
+        void createVulkanPreview();
+        void shutdownVulkanPreview();
     };
 }
 
