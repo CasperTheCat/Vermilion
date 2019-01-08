@@ -382,7 +382,7 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 		if(pHitColour) 
 			*pHitColour = glm::vec3(0,.5,1.0) * 15.f;
 		if(pHitNormal)
-			*pHitNormal = -glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(-55, 350,-150));
+			*pHitNormal = -glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(15,140,25));
 
 	}
 
@@ -407,22 +407,22 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 
 	}*/
 
-	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0, 3300, 1300), 250.f);
+	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0, 3500, 4000), 750.f);
 	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 	{
 		nearestHit = testHit;
 		// Sphere is closest, it's a light!
 		if(pHitColour) 
-			*pHitColour = glm::vec3(1.0,1.0,1.0) * 15.2f;
+			*pHitColour = glm::vec3(1.0,1.0,1.0) * 45.2f;
 		if(pHitNormal)
-				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(500, 800, 1300));
+				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0, 3500, 4000));
 
 	}
 
 
 
 	{
-		auto sizeOfSpheres = 1e7 * 5;
+		auto sizeOfSpheres = 1e2 * 5;
 		// TopBottom
 		/*testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,-sizeOfSpheres + 1000,0), sizeOfSpheres);
 		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
@@ -449,12 +449,12 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0,-sizeOfSpheres,0));
 		}
 
-		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,sizeOfSpheres + 1000,0), sizeOfSpheres);
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,sizeOfSpheres + 5000,0), sizeOfSpheres);
 		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 		{
 			nearestHit = testHit;
 			if(pHitNormal)
-				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0,sizeOfSpheres + 1000,0));
+				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0,sizeOfSpheres + 5000,0));
 
 		}
 

@@ -147,15 +147,25 @@ bool BVH::getIntersection(const Ray& ray, IntersectionInfo* intersection, bool o
 BVH::~BVH() 
 {
 	// Tris was copied
-	//for(auto i : build_prims)
-	//	delete i;
-  delete[] flatTree;
+    for(auto i : build_prims)
+        delete i;
+    delete[] flatTree;
 }
-
-BVH::BVH(std::vector<Object*> objects, uint32_t leafSize)
+/*
+BVH::BVH(std::vector<Object*>&& objects, uint32_t leafSize)
   : nNodes(0), nLeafs(0), leafSize(leafSize), flatTree(NULL) {
 
-    build_prims = std::vector<Object *>(objects);
+    build_prims = std::move(objects);
+    // Build the tree based on the input object data set.
+    build();
+    LOG_STAT("Built BVH (%d nodes, with %d leafs)", nNodes, nLeafs);
+  }
+*/
+BVH::BVH(std::vector<Object*>& objects, uint32_t leafSize)
+  : nNodes(0), nLeafs(0), leafSize(leafSize), flatTree(NULL) {
+
+  //  build_prims = std::vector<Object *>(objects);
+    build_prims = std::move(objects);
     // Build the tree based on the input object data set.
     build();
     LOG_STAT("Built BVH (%d nodes, with %d leafs)", nNodes, nLeafs);
