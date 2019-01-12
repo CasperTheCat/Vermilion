@@ -21,7 +21,8 @@ void InitInstance(VkInstance &i)
     appInfo.applicationVersion = VK_MAKE_VERSION(0,0,1);
     appInfo.pEngineName = "Vermilion Renderer";
     appInfo.engineVersion = VK_MAKE_VERSION(2, 0, 0);
-    appInfo.apiVersion = VK_API_VERSION_1_1;
+    //appInfo.apiVersion = VK_API_VERSION_1_1;
+    appInfo.apiVersion = VK_API_VERSION_1_0;
 
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions;
