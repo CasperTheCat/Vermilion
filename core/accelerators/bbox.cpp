@@ -49,7 +49,7 @@ float BBox::surfaceArea() const {
   return 2.f*( extent.x*extent.z + extent.x*extent.y + extent.y*extent.z );
 }
 
-// http://www.flipcode.com/archives/SSE_RayBox_Intersection_Test.shtml
+/*// http://www.flipcode.com/archives/SSE_RayBox_Intersection_Test.shtml
 // turn those verbose intrinsics into something readable.
 #define loadps(mem)		_mm_load_ps((const float * const)(mem))
 #define storess(ss,mem)		_mm_store_ss((float * const)(mem),(ss))
@@ -65,7 +65,7 @@ static const float flt_plus_inf = -logf(0);	// let's keep C and C++ compilers ha
 static const float __attribute__((aligned(16)))
   ps_cst_plus_inf[4] = {  flt_plus_inf,  flt_plus_inf,  flt_plus_inf,  flt_plus_inf },
   ps_cst_minus_inf[4] = { -flt_plus_inf, -flt_plus_inf, -flt_plus_inf, -flt_plus_inf };
-
+*/
 
 bool BBox::intersect(const Ray& ray, float *tnear, float *tfar) const
 {
@@ -92,7 +92,7 @@ bool BBox::intersect(const Ray& ray, float *tnear, float *tfar) const
 
 
 
-  // you may already have those values hanging around somewhere
+  /*// you may already have those values hanging around somewhere
   const __m128
     plus_inf	= loadps(ps_cst_plus_inf),
               minus_inf	= loadps(ps_cst_minus_inf);
@@ -137,5 +137,5 @@ bool BBox::intersect(const Ray& ray, float *tnear, float *tfar) const
   storess(lmin, tnear);
   storess(lmax, tfar);
 
-  return  ret;
+  return  ret;*/
 }

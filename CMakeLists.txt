@@ -21,9 +21,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -Wall -ggdb")
 #FIND_PACKAGE(Boost COMPONENTS system filesystem REQUIRED)
 #FIND_PACKAGE(OpenEXR)
 FIND_PACKAGE(OpenImageIO REQUIRED)
-FIND_PACKAGE(Assimp REQUIRED)
-FIND_PACKAGE(Threads REQUIRED)
-FIND_PACKAGE(GLM REQUIRED)
+#FIND_PACKAGE(Assimp REQUIRED)
+#FIND_PACKAGE(Threads REQUIRED)
+#FIND_PACKAGE(GLM REQUIRED)
 FIND_PACKAGE(Vulkan)
 
 set(USE_GUI true CACHE BOOL "Disable GUI")
@@ -79,25 +79,35 @@ set(FRONT_END
 include_directories(
         ${Vulkan_INCLUDE_DIRS}
         ${OIIO_INCLUDE_DIRS}
-        ${GLM_INCLUDE_DIRS}
-        ${ASSIMP_INCLUDE_DIRS}
+        #${GLM_INCLUDE_DIRS} 
+
+        #${ASSIMP_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/core
         ${CMAKE_SOURCE_DIR}/extern
         ${CMAKE_SOURCE_DIR}/extern/glfw/include
+        ${CMAKE_SOURCE_DIR}/extern/glm
+        ${CMAKE_SOURCE_DIR}/extern/assimp/include
 )
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/extern/glfw)
+add_subdirectory(${CMAKE_SOURCE_DIR}/extern/glm)
+add_subdirectory(${CMAKE_SOURCE_DIR}/extern/assimp)
 
 #link_directories(${CMAKE_SOURCE_DIR}/lib)
 
 add_executable(Vermilion ${FRONT_END} ${SOURCE_FILES})
 
+
+MESSAGE( STATUS "sdsd:         "     ${OIIO_LIBRARIES} )
+
 target_link_libraries(Vermilion
     glfw
-    ${ASSIMP_LIBRARIES}
-    ${Boost_LIBRARIES} 
+    assimp
+    glm
+    #${ASSIMP_LIBRARIES}
+    #${Boost_LIBRARIES} 
     ${OIIO_LIBRARIES}
     ${Vulkan_LIBRARIES}
-    ${GLFW_LIBRARIES}
+    #${GLFW_LIBRARIES}
 )
 
