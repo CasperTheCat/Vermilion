@@ -1,2 +1,4 @@
 # Vermilion Renderer
-##### Raytracer
+
+##### Pathtracer
+
