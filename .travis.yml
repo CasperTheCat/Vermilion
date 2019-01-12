@@ -1,0 +1,19 @@
+language: cpp
+
+dist: xenial
+
+compiler:
+  - clang
+
+before_install:
+  - sudo apt install -y libopenimageio
+  - sudo apt install -y libvulkan1 libvulkan-dev
+  addons:
+    apt:
+      update: true
+
+script:
+  - mkdir Build/
+  - cd Build/
+  - cmake -DCMAKE_BUILD_TYPE=Release ../
+  - make -j 2
