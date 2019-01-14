@@ -55,6 +55,7 @@ namespace Vermilion
 
         VkPipelineCache m_pcache;
         VkSurfaceKHR m_surface;
+        VkSwapchainKHR m_chain;
 
         struct 
         {

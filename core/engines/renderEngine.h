@@ -33,6 +33,7 @@ namespace Vermilion
         bool bHasInternalLogEng;
 
         // Vulkan Preview Window
+        friend class VkRenderer;
         class VkRenderer *mRtPreview;
         std::thread mPreviewThread;
 
@@ -63,6 +64,8 @@ namespace Vermilion
         void createVulkanPreview();
         void shutdownVulkanPreview();
     };
+
+
 }
 
 

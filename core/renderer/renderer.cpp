@@ -300,9 +300,144 @@ void GetChainSupports
     if(formatCount == 0) throw std::runtime_error("No Swapchain Formats");
     cs.presentModes.resize(formatCount);
     vkGetPhysicalDeviceSurfacePresentModesKHR(d, s, &formatCount, cs.presentModes.data());
-
-    
 }
+
+uint32_t GetBestSwapFormat
+(
+    Vermilion::SwapChainSupportDetails &cs
+)
+{
+    if(cs.formats.size() == 1 && cs.formats[0].format == VK_FORMAT_UNDEFINED)
+    {
+        // VK doesn't care about any format
+        cs.formats[0].colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+        cs.formats[0].format = VK_FORMAT_B8G8R8A8_UNORM;
+        return 0;
+    }
+
+    for(uint32_t i = 0; i < cs.formats.size(); ++i)
+    {
+        if
+        (
+            cs.formats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR
+            &&
+            cs.formats[i].format == VK_FORMAT_B8G8R8A8_UNORM
+        )
+        {
+            return i;
+        }
+    }
+
+    // We have to pick a format.
+    // Just alert for now
+    std::cout << "VK didn't allow any format" << std::endl;
+    //return cs.formats[0];
+    return 0;
+}
+
+uint32_t GetBestPresMode
+(
+    Vermilion::SwapChainSupportDetails &cs
+)
+{
+    uint32_t currentBest = 0;
+    for(uint32_t i = 0; i < cs.presentModes.size(); ++i)
+    {
+        if(cs.presentModes[i] == VK_PRESENT_MODE_MAILBOX_KHR){return i;}
+
+        if(cs.presentModes[i] == VK_PRESENT_MODE_IMMEDIATE_KHR){currentBest = i;}
+    }
+
+    // We have to pick a format.
+    // Just alert for now
+    return currentBest;
+}
+
+Vermilion::SwapChainSupportDetails* GetSwapExtent
+(
+    Vermilion::SwapChainSupportDetails &cs,
+    uint32_t uWidth,
+    uint32_t uHeight
+)
+{
+    if(cs.capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
+    {
+        return &cs;
+    }
+
+    cs.capabilities.currentExtent.width = std::max(
+        cs.capabilities.minImageExtent.width,
+        std::min(
+            cs.capabilities.maxImageExtent.width,
+            uWidth
+        ));
+
+    cs.capabilities.currentExtent.height = std::max(
+        cs.capabilities.minImageExtent.height,
+        std::min(
+            cs.capabilities.maxImageExtent.height,
+            uHeight
+        ));
+    return &cs;
+}
+
+void CreateSwapChain
+(
+    Vermilion::SwapChainSupportDetails &cs,
+    VkDevice d,
+    VkSurfaceKHR s,
+    uint32_t bestFormat,
+    uint32_t bestPresMode,
+    Vermilion::RendererQueueFamilies &rqf,
+    VkSwapchainKHR &sc
+)
+{
+    uint32_t imageCount = cs.capabilities.minImageCount + 1;
+    if
+    (
+        cs.capabilities.maxImageCount > 0
+        &&
+        imageCount > cs.capabilities.maxImageCount
+    ) 
+    {
+        imageCount = cs.capabilities.maxImageCount;
+    }
+
+    VkSwapchainCreateInfoKHR createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    createInfo.surface = s;
+    createInfo.minImageCount = imageCount;
+    createInfo.imageFormat = cs.formats[bestFormat].format;
+    createInfo.imageColorSpace = cs.formats[bestFormat].colorSpace;
+    createInfo.imageExtent = cs.capabilities.currentExtent;
+    createInfo.imageArrayLayers = 1;
+    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+    if(rqf.graphicsIndex != rqf.presentIndex)
+    {
+        uint32_t accessingFamilies[2] = {rqf.graphicsIndex, rqf.presentIndex};
+        createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+        createInfo.queueFamilyIndexCount = 2;
+        createInfo.pQueueFamilyIndices = accessingFamilies;
+    }
+    else
+    {
+        createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    }
+
+    createInfo.preTransform = cs.capabilities.currentTransform;
+    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    createInfo.presentMode = cs.presentModes[bestPresMode];
+    createInfo.clipped = VK_TRUE;
+    createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+    auto res = vkCreateSwapchainKHR(d, &createInfo, nullptr, &sc);
+    if(res != VK_SUCCESS)
+    {
+        throw std::runtime_error("Unable to create swapchain");
+    }
+}
+
 
 Vermilion::VkRenderer::VkRenderer(Camera *cam, RenderEngine *parent)
 {
@@ -337,10 +472,19 @@ Vermilion::VkRenderer::VkRenderer(Camera *cam, RenderEngine *parent)
     SubmissionInfo(m_sinfo, m_submitStages, m_semaphores.presentComplete, m_semaphores.renderComplete);
 
     GetChainSupports(m_chainSupport, m_phy, m_surface);
+
+    uint32_t bestFormat = GetBestSwapFormat(m_chainSupport);
+
+    uint32_t bestPresMode = GetBestPresMode(m_chainSupport);
+
+    GetSwapExtent(m_chainSupport, cam->uImageU, cam->uImageV);
+
+    CreateSwapChain(m_chainSupport, m_dev, m_surface, bestFormat, bestPresMode, m_queues, m_chain);
 }
 
 Vermilion::VkRenderer::~VkRenderer()
 {
+    vkDestroySwapchainKHR(m_dev, m_chain, nullptr);
     vkDestroyDevice(m_dev, nullptr);
     vkDestroySurfaceKHR(m_inst, m_surface, nullptr);
     vkDestroyInstance(m_inst, nullptr);
