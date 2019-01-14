@@ -389,7 +389,8 @@ void CreateSwapChain
     uint32_t bestFormat,
     uint32_t bestPresMode,
     Vermilion::RendererQueueFamilies &rqf,
-    VkSwapchainKHR &sc
+    VkSwapchainKHR &sc,
+    std::vector<VkImage> &fb
 )
 {
     uint32_t imageCount = cs.capabilities.minImageCount + 1;
@@ -436,6 +437,10 @@ void CreateSwapChain
     {
         throw std::runtime_error("Unable to create swapchain");
     }
+
+    vkGetSwapchainImagesKHR(d, sc, &imageCount, nullptr);
+    fb.resize(imageCount);
+    vkGetSwapchainImagesKHR(d, sc, &imageCount, fb.data());
 }
 
 
@@ -473,13 +478,15 @@ Vermilion::VkRenderer::VkRenderer(Camera *cam, RenderEngine *parent)
 
     GetChainSupports(m_chainSupport, m_phy, m_surface);
 
-    uint32_t bestFormat = GetBestSwapFormat(m_chainSupport);
+    m_bestFormatIndex = GetBestSwapFormat(m_chainSupport);
 
-    uint32_t bestPresMode = GetBestPresMode(m_chainSupport);
+    m_bestPresIndex = GetBestPresMode(m_chainSupport);
 
     GetSwapExtent(m_chainSupport, cam->uImageU, cam->uImageV);
 
-    CreateSwapChain(m_chainSupport, m_dev, m_surface, bestFormat, bestPresMode, m_queues, m_chain);
+    CreateSwapChain(m_chainSupport, m_dev, m_surface, m_bestFormatIndex, m_bestPresIndex, m_queues, m_chain, m_fbImages);
+
+
 }
 
 Vermilion::VkRenderer::~VkRenderer()

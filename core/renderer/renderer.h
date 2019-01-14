@@ -56,6 +56,11 @@ namespace Vermilion
         VkPipelineCache m_pcache;
         VkSurfaceKHR m_surface;
         VkSwapchainKHR m_chain;
+        
+        // Images
+        std::vector<VkImage> m_fbImages;
+        uint32_t m_bestFormatIndex;
+        uint32_t m_bestPresIndex;
 
         struct 
         {
