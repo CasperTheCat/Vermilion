@@ -284,8 +284,8 @@ void Surface
 void GetChainSupports
 (
     Vermilion::SwapChainSupportDetails &cs,
-    VkPhysicalDevice d,
-    VkSurfaceKHR s
+    VkPhysicalDevice& d,
+    VkSurfaceKHR& s
 )
 {
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR(d, s, &cs.capabilities);
@@ -300,8 +300,172 @@ void GetChainSupports
     if(formatCount == 0) throw std::runtime_error("No Swapchain Formats");
     cs.presentModes.resize(formatCount);
     vkGetPhysicalDeviceSurfacePresentModesKHR(d, s, &formatCount, cs.presentModes.data());
+}
 
-    
+VkSurfaceFormatKHR GetSwapSurfaceFormat
+(
+	const std::vector<VkSurfaceFormatKHR>& formatsVector
+)
+{
+	if(formatsVector.size() == 1 && formatsVector[0].format == VK_FORMAT_UNDEFINED)
+	{
+		return { VK_FORMAT_B8G8R8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR };
+	}
+
+	for(auto& format : formatsVector)
+	{
+		if (format.format == VK_FORMAT_B8G8R8A8_UNORM && format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+		{
+			return format;
+		}
+	}
+
+	return formatsVector[0];
+}
+
+VkPresentModeKHR GetSwapSurfacePresentMode
+(
+	const std::vector<VkPresentModeKHR>& presentsVector
+)
+{
+	VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
+
+	for (const auto& availablePresentMode : presentsVector) {
+
+		if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) 
+		{
+			return availablePresentMode;
+		}
+
+		if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR)
+		{
+			bestMode = availablePresentMode;
+		}
+	}
+
+	return bestMode;
+}
+
+VkExtent2D GetSwapSurfaceExtent
+(
+	const VkSurfaceCapabilitiesKHR& caps
+)
+{
+	if (caps.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
+		return caps.currentExtent;
+	}
+	
+	VkExtent2D actualExtent = { 1920, 1080 };
+
+	actualExtent.width = std::max(caps.minImageExtent.width, std::min(caps.maxImageExtent.width, actualExtent.width));
+	actualExtent.height = std::max(caps.minImageExtent.height, std::min(caps.maxImageExtent.height, actualExtent.height));
+
+	return actualExtent;
+}
+
+void CreateSwapChain
+(
+	Vermilion::SwapChainSupportDetails& cs,
+	VkSurfaceKHR &surface,
+	Vermilion::RendererQueueFamilies &rqf,
+	VkDevice &d,
+	VkSwapchainKHR& swapchain,
+	std::vector<VkImage> &images,
+	VkFormat &chainFormat,
+	VkExtent2D &chainExtent
+)
+{
+	VkSurfaceFormatKHR surfaceFormat = GetSwapSurfaceFormat(cs.formats);
+	VkPresentModeKHR presentMode = GetSwapSurfacePresentMode(cs.presentModes);
+	VkExtent2D extent = GetSwapSurfaceExtent(cs.capabilities);
+
+	uint32_t imageCount = cs.capabilities.minImageCount + 1;
+
+	if (cs.capabilities.maxImageCount > 0 && imageCount > cs.capabilities.maxImageCount) {
+		imageCount = cs.capabilities.maxImageCount;
+	}
+
+	VkSwapchainCreateInfoKHR createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	createInfo.surface = surface;
+	createInfo.minImageCount = imageCount;
+	createInfo.imageFormat = surfaceFormat.format;
+	createInfo.imageColorSpace = surfaceFormat.colorSpace;
+	createInfo.imageExtent = extent;
+	createInfo.imageArrayLayers = 1;
+	createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+	uint32_t queueFamilyIndices[] = { rqf.graphicsIndex,  rqf.presentIndex };
+
+	if (rqf.graphicsIndex != rqf.presentIndex) {
+		createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+		createInfo.queueFamilyIndexCount = 2;
+		createInfo.pQueueFamilyIndices = queueFamilyIndices;
+	}
+	else {
+		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		createInfo.queueFamilyIndexCount = 0; // Optional
+		createInfo.pQueueFamilyIndices = nullptr; // Optional
+	}
+
+	createInfo.preTransform = cs.capabilities.currentTransform;
+	createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	createInfo.presentMode = presentMode;
+	createInfo.clipped = VK_TRUE;
+	createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+	if (vkCreateSwapchainKHR(d, &createInfo, nullptr, &swapchain) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create swap chain!");
+	}
+
+	// While we are here, lets set up the chain image references
+	vkGetSwapchainImagesKHR(d, swapchain, &imageCount, nullptr);
+	images.resize(imageCount);
+	vkGetSwapchainImagesKHR(d, swapchain, &imageCount, images.data());
+
+	chainFormat = surfaceFormat.format;
+	chainExtent = extent;
+}
+
+void CreateImageViews
+(
+	std::vector<VkImage>& images,
+	std::vector<VkImageView>& imageViews,
+	VkFormat &chainFormat,
+	VkDevice &d
+)
+{
+	imageViews.resize(images.size());
+
+	for(uint64_t i = 0; i < images.size(); ++i)
+	{
+		VkImageViewCreateInfo createInfo = {};
+		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		createInfo.image = images[i];
+		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		createInfo.format = chainFormat;
+		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		createInfo.subresourceRange.baseMipLevel = 0;
+		createInfo.subresourceRange.levelCount = 1;
+		createInfo.subresourceRange.baseArrayLayer = 0;
+		createInfo.subresourceRange.layerCount = 1;
+
+		if (vkCreateImageView(d, &createInfo, nullptr, &imageViews[i]) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create image views!");
+		}
+	}
+}
+
+void CreateGraphicsPipeline
+(
+
+)
+{
+	
 }
 
 Vermilion::VkRenderer::VkRenderer(Camera *cam, RenderEngine *parent)
@@ -337,15 +501,27 @@ Vermilion::VkRenderer::VkRenderer(Camera *cam, RenderEngine *parent)
     SubmissionInfo(m_sinfo, m_submitStages, m_semaphores.presentComplete, m_semaphores.renderComplete);
 
     GetChainSupports(m_chainSupport, m_phy, m_surface);
+
+	CreateSwapChain(m_chainSupport, m_surface, m_queues, m_dev, m_chain, m_swapPlanes, m_chainFormat, m_chainExtent);
+
+	CreateImageViews(m_swapPlanes, m_swapPlaneViews, m_chainFormat, m_dev);
+
+	CreateGraphicsPipeline();
 }
+
+
 
 Vermilion::VkRenderer::~VkRenderer()
 {
     vkDestroyDevice(m_dev, nullptr);
     vkDestroySurfaceKHR(m_inst, m_surface, nullptr);
     vkDestroyInstance(m_inst, nullptr);
+	vkDestroySwapchainKHR(m_dev, m_chain, nullptr);
     glfwDestroyWindow(m_window);
     glfwTerminate();
+	for (auto imageView : m_swapPlaneViews) {
+		vkDestroyImageView(m_dev, imageView, nullptr);
+	}
     m_uiThread.join();
 }
 

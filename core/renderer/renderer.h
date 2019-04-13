@@ -39,12 +39,15 @@ namespace Vermilion
         RendererQueueFamilies m_queues{};
 
         SwapChainSupportDetails m_chainSupport;
+		VkSwapchainKHR m_chain;
 
         VkFormat m_depthFormat;
         VkCommandPool m_cmdPool;
         VkPipelineStageFlags m_submitStages = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
         VkSubmitInfo m_sinfo;
+		VkFormat m_chainFormat;
+		VkExtent2D m_chainExtent;
 
         std::vector<VkCommandBuffer> m_drawCommands;
 
@@ -64,6 +67,9 @@ namespace Vermilion
         } m_semaphores;
 
         std::vector<VkFence> m_waitFences;
+
+		std::vector<VkImage> m_swapPlanes;
+		std::vector<VkImageView> m_swapPlaneViews;
 
         GLFWwindow* m_window;
         class RenderEngine *m_engine;
