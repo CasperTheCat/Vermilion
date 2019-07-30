@@ -95,7 +95,7 @@ glm::vec4 Radiance(Vermilion::MeshEngine *mEng, glm::vec3 rStart, glm::vec3 rDir
 		// Shading Models
 		//if(true || distrib(mtRanEngine) >= 0.5)
 		//if (hitMaterial->mProperties[ma]->mSemantic == aiTextureType_DIFFUSE);
-		if(hitMaterial && distrib(mtRanEngine) >= 0.96)
+		if(hitMaterial && distrib(mtRanEngine) >= 0.80)
 		{
 			// Perform a Specular sample
 			Vermilion::FLOAT gx = sin(2 * M_PI * distrib(mtRanEngine));
@@ -226,9 +226,10 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 		#pragma omp parallel for schedule(dynamic, 1)
 		for (uint64_t p = 0; p < cam->RenderTargetSize; ++p)
 		{
-			fprintf(stderr, "\rRendering (%d spp) %5.2f%%", cam->uSamplesPerPixel, 100. * p / (cam->RenderTargetSize - 1));
+			//fprintf(stderr, "\rRendering (%d spp) %5.2f%%", cam->uSamplesPerPixel, 100. * p / (cam->RenderTargetSize - 1));
 			std::uniform_real_distribution<float> distrib(0, 0.5);
-			thread_local std::mt19937_64 mtRanEngine(std::random_device{}());
+			thread_local std::mt19937_64 mtRanEngine(std::random_device{}() * p);
+			//thread_local std::mt19937_64 mtRanEngine(p);
 
 			pixelValue newPixelCarrier;
 			glm::vec4 accum = glm::vec4(0,0,0,0);
@@ -289,6 +290,10 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 						// Early Stopping
 						if
 						(
+							false 
+							
+							&&
+
 							nTotalSamples > sqrt(cam->uSamplesPerPixel)
 
 							&&
@@ -316,11 +321,15 @@ void Vermilion::PathTracer::Render(std::vector<Vermilion::Camera*>& cameraList, 
 			//nTotalSamples = cam->uSamplesPerPixel;
 
 			newPixelCarrier.pixel = p;
-			newPixelCarrier.red = std::max(std::min(accum.x / nTotalSamples, 1.f), 0.f); // nTotalSamples * (1 / 255.f);
-			newPixelCarrier.green = std::max(std::min(accum.y / nTotalSamples, 1.f), 0.f);
-			newPixelCarrier.blue = std::max(std::min(accum.z / nTotalSamples, 1.f), 0.f);
+			//newPixelCarrier.red = std::max(std::min(accum.x / nTotalSamples, 1.f), 0.f); // nTotalSamples * (1 / 255.f);
+			//newPixelCarrier.green = std::max(std::min(accum.y / nTotalSamples, 1.f), 0.f);
+			//newPixelCarrier.blue = std::max(std::min(accum.z / nTotalSamples, 1.f), 0.f);
+			newPixelCarrier.red = accum.x / nTotalSamples;
+			newPixelCarrier.green = accum.y / nTotalSamples;
+			newPixelCarrier.blue = accum.z / nTotalSamples;
 			newPixelCarrier.alpha = 1.f;//std::max(std::min(accum.w, 1.f), 0.f);
-			newPixelCarrier.depth = nTotalSamples;//accum.w;
+			newPixelCarrier.depth = accum.w;
+			newPixelCarrier.samples = 1;
 			cam->setPixelValue(newPixelCarrier);
 		}
 		fprintf(stderr, "\n");

@@ -18,6 +18,16 @@
 namespace Vermilion
 {
 
+enum class ColourChannel
+{
+	RED = 0,
+	GREEN = 1,
+	BLUE = 2,
+	ALPHA = 3,
+
+	NONE
+};
+
 enum class vermRenderMode
 {
 	RGB,
@@ -55,6 +65,7 @@ struct pixelValue
 	float alpha; // 8
 	float depth;
 	float light; // 8
+	uint64_t samples;
 };
 
 class Camera
@@ -111,6 +122,7 @@ class Camera
 	void RenderTile(frameTile &rTile);
 	bool rayShadowCast(glm::vec3 pos, glm::vec3 dir);
 	Vermilion::float4 rayCast(float3 start, float3 rotation, float ofx, float ofy, bool recursive);
+	Vermilion::FLOAT getScaledPixel(uint64_t index, ColourChannel colourChannel);
 
   public:
 	Camera(cameraSettings &_settings);

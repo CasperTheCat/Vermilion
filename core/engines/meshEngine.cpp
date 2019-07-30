@@ -374,48 +374,60 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 
 	// HardCoded Light Test
 	//testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(50, 110, 200), 15.f);
-	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(15, 140,25), 3.5f);
-	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
-	{
-		nearestHit = testHit;
-		// Sphere is closest, it's a light!
-		if(pHitColour) 
-			*pHitColour = glm::vec3(0,.5,1.0) * 15.f;
-		if(pHitNormal)
-			*pHitNormal = -glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(-55, 350,-150));
+	// testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(15, 140,25), 3.5f);
+	// if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+	// {
+	// 	nearestHit = testHit;
+	// 	// Sphere is closest, it's a light!
+	// 	if(pHitColour) 
+	// 		*pHitColour = glm::vec3(0,.5,1.0) * 150.f;
+	// 	if(pHitNormal)
+	// 		*pHitNormal = -glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(-55, 350,-150));
 
-	}
+	// }
 
-	/*testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(500, 500, 500), 15.f);
+	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(500, 500, 500), 150.f);
 	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 	{
 		nearestHit = testHit;
 		// Sphere is closest, it's a light!
 		if(pHitColour) 
 			*pHitColour = glm::vec3(1.0,1.0,1.0) * 1.f;
-	}*/
+	}
 
-	/*testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(500, 800, 1300), 250.f);
+	// testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(500, 800, 1300), 250.f);
+	// if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+	// {
+	// 	nearestHit = testHit;
+	// 	// Sphere is closest, it's a light!
+	// 	if(pHitColour) 
+	// 		*pHitColour = glm::vec3(1.0,1.0,1.0) * 10.2f;
+	// 	if(pHitNormal)
+	// 			*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(500, 800, 1300));
+
+	// }
+
+	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0, 1300, 1300), 25.f);
 	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 	{
 		nearestHit = testHit;
 		// Sphere is closest, it's a light!
 		if(pHitColour) 
-			*pHitColour = glm::vec3(1.0,1.0,1.0) * 10.2f;
+			*pHitColour = glm::vec3(1.0,1.0,1.0) * 7.6f;
 		if(pHitNormal)
-				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(500, 800, 1300));
+			*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0, 1300, 1300));
 
-	}*/
+	}
 
-	testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0, 3300, 1300), 250.f);
+		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(-100, 0, 80), 25.f);
 	if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
 	{
 		nearestHit = testHit;
 		// Sphere is closest, it's a light!
 		if(pHitColour) 
-			*pHitColour = glm::vec3(1.0,1.0,1.0) * 15.2f;
+			*pHitColour = glm::vec3(0,0.50,1.0) * 1.5f;
 		if(pHitNormal)
-				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(500, 800, 1300));
+				*pHitNormal = glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(-100, 0, 80));
 
 	}
 
@@ -424,13 +436,13 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 	{
 		auto sizeOfSpheres = 1e7 * 5;
 		// TopBottom
-		/*testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,-sizeOfSpheres + 1000,0), sizeOfSpheres);
-		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
-		{
-			nearestHit = testHit;
-			if(pHitNormal)
-				*pHitNormal = -glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0,-sizeOfSpheres + 1000,0));
-		}
+		// testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,-sizeOfSpheres + 1000,0), sizeOfSpheres);
+		// if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
+		// {
+		// 	nearestHit = testHit;
+		// 	if(pHitNormal)
+		// 		*pHitNormal = -glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0,-sizeOfSpheres + 1000,0));
+		// }
 
 		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,sizeOfSpheres - 0,0), sizeOfSpheres);
 		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck
@@ -439,7 +451,7 @@ bool Vermilion::MeshEngine::RayCast(const glm::vec3& rayStart, const glm::vec3& 
 			if(pHitNormal)
 				*pHitNormal = -glm::normalize(rayStart + (rayDirection * nearestHit) - glm::vec3(0,sizeOfSpheres - 0,0));
 
-		}*/
+		}
 
 		testHit = sphereIntersect(rayStart, rayDirection, glm::vec3(0,-sizeOfSpheres,0), sizeOfSpheres);
 		if (testHit > 0.f && testHit < nearestHit) // EpsilonCheck

@@ -51,6 +51,7 @@ namespace Vermilion
         ~RenderEngine();
 
 		void draw();
+        void draw(uint32_t nSampleCount);
 
 		void saveFrame(std::string name);
 

@@ -91,8 +91,13 @@ int main(int argc, char **argv)
         }
         mEng->bindTexture(textureName);
 
-        rEng->draw();
-        rEng->saveFrame("output");
+        //rEng->draw();
+        for(uint32_t l = 0; l < 1000; ++l)
+        {
+            rEng->draw(4 * (1 + l));
+            rEng->saveFrame("output_" + std::to_string((l)));
+        }
+        
     }
     
     delete mEng;

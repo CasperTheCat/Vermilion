@@ -60,13 +60,16 @@ Vermilion::Camera::Camera(cameraSettings &_settings)
 	switch (renderMode)
 	{
 	case vermRenderMode::RGB:
-		mImage = new float[RenderTargetSize * 3];
+		mImage = new float[RenderTargetSize * 4];
+		memset(mImage, 0, RenderTargetSize * 4);
 		break;
 	case vermRenderMode::RGBA:
-		mImage = new float[RenderTargetSize * 4];
+		mImage = new float[RenderTargetSize * 5];
+		memset(mImage, 0, RenderTargetSize * 5);
 		break;
 	case vermRenderMode::RGBAZ:
-		mImage = new float[RenderTargetSize * 5];
+		mImage = new float[RenderTargetSize * 6];
+		memset(mImage, 0, RenderTargetSize * 6);
 		break;
 	case vermRenderMode::Depth:
 		mImage = new float[RenderTargetSize];
@@ -91,25 +94,28 @@ void Vermilion::Camera::setPixelValue(pixelValue &newPixelValue)
 	switch (renderMode)
 	{
 	case vermRenderMode::RGB:
-		temp = mImage + newPixelValue.pixel * 3;
-		temp[0] = newPixelValue.red;
-		temp[1] = newPixelValue.green;
-		temp[2] = newPixelValue.blue;
+		temp = mImage + newPixelValue.pixel * 4;
+		temp[0] += newPixelValue.red;
+		temp[1] += newPixelValue.green;
+		temp[2] += newPixelValue.blue;
+		temp[3] += newPixelValue.samples;
 		break;
 	case vermRenderMode::RGBA:
-		temp = mImage + newPixelValue.pixel * 4;
-		temp[0] = newPixelValue.red;
-		temp[1] = newPixelValue.green;
-		temp[2] = newPixelValue.blue;
-		temp[3] = newPixelValue.alpha;
+		temp = mImage + newPixelValue.pixel * 5;
+		temp[0] += newPixelValue.red;
+		temp[1] += newPixelValue.green;
+		temp[2] += newPixelValue.blue;
+		temp[3] += newPixelValue.alpha;
+		temp[4] += newPixelValue.samples;
 		break;
 	case vermRenderMode::RGBAZ:
-		temp = mImage + newPixelValue.pixel * 5;
-		temp[0] = newPixelValue.red;
-		temp[1] = newPixelValue.green;
-		temp[2] = newPixelValue.blue;
-		temp[3] = newPixelValue.alpha;
-		temp[4] = newPixelValue.depth;
+		temp = mImage + newPixelValue.pixel * 6;
+		temp[0] += newPixelValue.red;
+		temp[1] += newPixelValue.green;
+		temp[2] += newPixelValue.blue;
+		temp[3] += newPixelValue.alpha;
+		temp[4] += newPixelValue.depth;
+		temp[5] += newPixelValue.samples;
 		break;
 	case vermRenderMode::Depth:
 		mImage[newPixelValue.pixel] = newPixelValue.depth;
@@ -120,6 +126,25 @@ void Vermilion::Camera::setPixelValue(pixelValue &newPixelValue)
 		CXX17_FALLTHROUGH;
 	default:
 		throw std::exception();
+	}
+}
+
+Vermilion::FLOAT Vermilion::Camera::getScaledPixel(uint64_t index, ColourChannel colourChannel)
+{
+	uint32_t channel = static_cast<std::underlying_type_t<ColourChannel>>(colourChannel);
+
+	//printf("%f / %f = %f\n", mImage[index * 5 + channel], mImage[index * 5 + 4], mImage[index * 5 + channel] / mImage[index * 5 + 4]);
+
+	switch (renderMode)
+	{
+		case vermRenderMode::RGB:
+			return mImage[index * 4 + channel] / mImage[index * 4 + 3];
+		case vermRenderMode::RGBA:
+			return mImage[index * 5 + channel] / mImage[index * 5 + 4];
+		case vermRenderMode::RGBAZ:
+			return mImage[index * 6 + channel] / mImage[index * 6 + 5];
+		default:
+			return 1.f;
 	}
 }
 
@@ -144,22 +169,22 @@ void Vermilion::Camera::saveFrame(std::string name)
 		switch (renderMode)
 		{
 		case vermRenderMode::RGB:
-			outFrame[p * 4 + 0] = static_cast<unsigned char>(std::floor(mImage[p * 3] * 255));
-			outFrame[p * 4 + 1] = static_cast<unsigned char>(std::floor(mImage[p * 3 + 1] * 255));
-			outFrame[p * 4 + 2] = static_cast<unsigned char>(std::floor(mImage[p * 3 + 2] * 255));
+			outFrame[p * 4 + 0] = static_cast<unsigned char>(std::floor(getScaledPixel(p, ColourChannel::RED) * 255));
+			outFrame[p * 4 + 1] = static_cast<unsigned char>(std::floor(getScaledPixel(p, ColourChannel::GREEN) * 255));
+			outFrame[p * 4 + 2] = static_cast<unsigned char>(std::floor(getScaledPixel(p, ColourChannel::BLUE) * 255));
 			outFrame[p * 4 + 3] = 1;
 			break;
 		case vermRenderMode::RGBA:
-			outFrame[p * 4 + 0] = static_cast<unsigned char>(std::floor(mImage[p * 4 + 0] * 255));
-			outFrame[p * 4 + 1] = static_cast<unsigned char>(std::floor(mImage[p * 4 + 1] * 255));
-			outFrame[p * 4 + 2] = static_cast<unsigned char>(std::floor(mImage[p * 4 + 2] * 255));
-			outFrame[p * 4 + 3] = static_cast<unsigned char>(std::floor(mImage[p * 4 + 3] * 255));
+			outFrame[p * 4 + 0] = static_cast<unsigned char>(std::floor(getScaledPixel(p, ColourChannel::RED) * 255));
+			outFrame[p * 4 + 1] = static_cast<unsigned char>(std::floor(getScaledPixel(p, ColourChannel::GREEN) * 255));
+			outFrame[p * 4 + 2] = static_cast<unsigned char>(std::floor(getScaledPixel(p, ColourChannel::BLUE) * 255));
+			outFrame[p * 4 + 3] = 255;//static_cast<unsigned char>(std::floor(getScaledPixel(p, ColourChannel::ALPHA) * 255));
 			break;
 		case vermRenderMode::RGBAZ:
-			outFrame[p * 4 + 0] = static_cast<unsigned char>(std::floor(mImage[p * 5 + 0] * 255));
-			outFrame[p * 4 + 1] = static_cast<unsigned char>(std::floor(mImage[p * 5 + 1] * 255));
-			outFrame[p * 4 + 2] = static_cast<unsigned char>(std::floor(mImage[p * 5 + 2] * 255));
-			outFrame[p * 4 + 3] = static_cast<unsigned char>(std::floor(mImage[p * 5 + 3] * 255));
+			outFrame[p * 4 + 0] = 1.f;//static_cast<unsigned char>(std::floor(getScaledPixel(p, ColourChannel::RED) * 255));
+			outFrame[p * 4 + 1] = 0.5f;//static_cast<unsigned char>(std::floor(getScaledPixel(p, ColourChannel::GREEN) * 255));
+			outFrame[p * 4 + 2] = 0.f;//static_cast<unsigned char>(std::floor(getScaledPixel(p, ColourChannel::BLUE) * 255));
+			outFrame[p * 4 + 3] = 1.f;//static_cast<unsigned char>(std::floor(getScaledPixel(p, ColourChannel::ALPHA) * 255));
 			outDepth[p] = mImage[p * 5 + 4];
 			break;
 		case vermRenderMode::Depth:
